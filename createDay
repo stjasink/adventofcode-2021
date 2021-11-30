@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+if [ -z "${1-}" ]; then
+  echo "Please enter the day, e.g. 01, 15, etc" >&2
+  exit 1
+else
+  DAY=${1}
+fi
+
+CLASSNAME=Day${DAY}
+RESOURCENAME=day-${DAY}.txt
+
+cp src/main/kotlin/Template.kt src/main/kotlin/${CLASSNAME}.kt
+sed -i "" -e s/Template/${CLASSNAME}/ -e s/template.txt/${RESOURCENAME}/ src/main/kotlin/${CLASSNAME}.kt
+touch src/main/resources/${RESOURCENAME}
+cp src/test/kotlin/TemplateTest.kt src/test/kotlin/${CLASSNAME}Test.kt
+sed -i "" -e s/Template/${CLASSNAME}/ src/test/kotlin/${CLASSNAME}Test.kt
