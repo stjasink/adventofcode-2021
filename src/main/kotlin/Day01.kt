@@ -15,15 +15,14 @@ class Day01 : Solver {
     }
 
     override fun part2(input: List<String>): Long {
-        val groupedDepths = input.windowed(3).map { it.sumOf { it.toLong() } }
+        val groupedDepths = input.windowed(3).map { group -> group.sumOf { it.toLong() } }
         return countIncreasingDepths(groupedDepths)
     }
 
     private fun countIncreasingDepths(depths: List<Long>): Long {
         return depths
             .windowed(2)
-            .map { depthPair -> depthPair[1] > depthPair[0] }
-            .count { it }
+            .count { depthPair -> depthPair[1] > depthPair[0] }
             .toLong()
     }
 }
