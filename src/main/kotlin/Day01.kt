@@ -11,11 +11,22 @@ fun main() {
 class Day01 : Solver {
 
     override fun part1(input: List<String>): Long {
+        return countIncreasingDepths(input.map { it.toLong() })
+    }
+
+    override fun part2(input: List<String>): Long {
+        val groupedDepths = mutableListOf<Long>()
+        for (i in 0 .. input.size - 3) {
+            groupedDepths.add(input.subList(i, i + 3).sumOf { it.toLong() })
+        }
+        return countIncreasingDepths(groupedDepths)
+    }
+
+    private fun countIncreasingDepths(depths: List<Long>): Long {
         var totalIncreases: Long = 0
         var previousDepth: Long? = null
 
-        input.forEach {
-            val depth = it.toLong()
+        depths.forEach { depth ->
             if (previousDepth != null) {
                 if (depth > previousDepth!!) {
                     totalIncreases += 1
@@ -25,13 +36,5 @@ class Day01 : Solver {
         }
 
         return totalIncreases
-    }
-
-    override fun part2(input: List<String>): Long {
-        val groupedDepths = mutableListOf<Long>()
-        for (i in 0 .. input.size - 3) {
-            groupedDepths.add(input.subList(i, i + 3).sumOf { it.toLong() })
-        }
-        return part1(groupedDepths.map { it.toString() })
     }
 }
