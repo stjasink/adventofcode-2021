@@ -14,12 +14,11 @@ class Day02 : Solver {
         var position = 0L
         var depth = 0L
         input.forEach { line ->
-            if (line.startsWith("forward")) {
-                position += line.substringAfter("forward ").toLong()
-            } else if (line.startsWith("down")) {
-                depth += line.substringAfter("down ").toLong()
-            } else if (line.startsWith("up")) {
-                depth -= line.substringAfter("up ").toLong()
+            val (instruction, value) = line.split(' ')
+            when (instruction) {
+                "forward" -> position += value.toLong()
+                "down" -> depth += value.toLong()
+                "up" -> depth -= value.toLong()
             }
         }
         return position * depth
@@ -30,14 +29,14 @@ class Day02 : Solver {
         var depth = 0L
         var aim = 0L
         input.forEach { line ->
-            if (line.startsWith("forward")) {
-                val amount = line.substringAfter("forward ").toLong()
-                position += amount
-                depth += amount * aim
-            } else if (line.startsWith("down")) {
-                aim += line.substringAfter("down ").toLong()
-            } else if (line.startsWith("up")) {
-                aim -= line.substringAfter("up ").toLong()
+            val (instruction, value) = line.split(' ')
+            when (instruction) {
+                "forward" -> {
+                    position += value.toLong()
+                    depth += value.toLong() * aim
+                }
+                "down" -> aim += value.toLong()
+                "up" -> aim -= value.toLong()
             }
         }
         return position * depth
