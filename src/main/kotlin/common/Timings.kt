@@ -24,7 +24,7 @@ fun runAndTime(solver: Solver, input: List<String>) {
 
     println("Timings")
     val part1Time = timeCode { solver.part1(input) }
-    println("Part 1: ${part1Time.toMillis()}ms / ${part1Time.toNanos() / 1000}μs")
+    println("Part 1: ${part1Time} ${part1Time.toMillis()}ms / ${part1Time.toNanos() / 1000}μs")
     val part2Time = timeCode { solver.part2(input) }
-    println("Part 2: ${part2Time.toMillis()}ms / ${part2Time.toNanos() / 1000}μs")
+    println("Part 2: $part2Time ${part2Time.toMillis()}ms / ${part2Time.toNanos() / 1000}μs")
 }
