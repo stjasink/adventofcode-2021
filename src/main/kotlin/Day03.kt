@@ -24,23 +24,23 @@ class Day03 : Solver {
             }
         }
 
-        val gammaRate = mutableListOf<Int>()
-        val epsilonRate = mutableListOf<Int>()
+        val gammaRateDigits = mutableListOf<Int>()
+        val epsilonRateDigits = mutableListOf<Int>()
 
         for (i in 0 until numZeros.size) {
             if (numZeros[i] > numOnes[i]) {
-                gammaRate.add(0)
-                epsilonRate.add(1)
+                gammaRateDigits.add(0)
+                epsilonRateDigits.add(1)
             } else if (numZeros[i] < numOnes[i]) {
-                gammaRate.add(1)
-                epsilonRate.add(0)
+                gammaRateDigits.add(1)
+                epsilonRateDigits.add(0)
             } else {
                 println("Error!  The same at index $i")
             }
         }
 
-        val gammaRateNum = gammaRate.joinToString("").toLong(2)
-        val epsilonRateNum = epsilonRate.joinToString("").toLong(2)
+        val gammaRateNum = gammaRateDigits.joinToString("").toLong(2)
+        val epsilonRateNum = epsilonRateDigits.joinToString("").toLong(2)
 
         return gammaRateNum * epsilonRateNum
     }
@@ -66,12 +66,12 @@ class Day03 : Solver {
     }
 
     private fun countZeroesAndOnes(
-        currentOxygenList: List<String>,
+        lines: List<String>,
         index: Int
     ): Pair<Int, Int> {
         var numZeroes = 0
         var numOnes = 0
-        currentOxygenList.forEach { line ->
+        lines.forEach { line ->
             if (line[index] == '0') {
                 numZeroes += 1
             } else if (line[index] == '1') {
