@@ -1,7 +1,6 @@
 import common.Solver
 import common.runAndTime
 import common.loadInput
-import kotlin.IllegalStateException
 
 fun main() {
     val input = loadInput("day-03.txt")
@@ -47,64 +46,39 @@ class Day03 : Solver {
     }
 
     override fun part2(input: List<String>): Long {
-
-        var currentOxygenList = input
-        for (index in 0 until input.first().length) {
-            var numZeroes = 0
-            var numOnes = 0
-            currentOxygenList.forEach { line ->
-                if (line[index] == '0') {
-                    numZeroes += 1
-                } else if (line[index] == '1') {
-                    numOnes += 1
-                }
-            }
-            val digitToKeepForOxygen = if (numZeroes > numOnes) '0' else '1'
-            if (currentOxygenList.size > 1) {
-                currentOxygenList = currentOxygenList.filter { it[index] == digitToKeepForOxygen }
-            }
-        }
-
-        var currentCO2List = input
-        for (index in 0 until input.first().length) {
-            var numZeroes = 0
-            var numOnes = 0
-            currentCO2List.forEach { line ->
-                if (line[index] == '0') {
-                    numZeroes += 1
-                } else if (line[index] == '1') {
-                    numOnes += 1
-                }
-            }
-            val digitToKeepForCO2 = if (numZeroes <= numOnes) '0' else '1'
-            if (currentCO2List.size > 1) {
-                currentCO2List = currentCO2List.filter { it[index] == digitToKeepForCO2 }
-            }
-        }
-
-        if (currentOxygenList.size > 1) {
-            throw IllegalStateException("Oxygen list is size ${currentOxygenList.size}")
-        }
-        if (currentCO2List.size > 1) {
-            throw IllegalStateException("CO2 list is size ${currentCO2List.size}")
-        }
-
-        val oxygenGenerator = currentOxygenList.first().toLong(2)
-        val c02Scrubber = currentCO2List.first().toLong(2)
-
-        return oxygenGenerator * c02Scrubber
+        val oxygenGenerator = filterBasedOnDigits(input) { numZeroes, numOnes -> if (numZeroes > numOnes) '0' else '1' }
+        val cO2Scrubber = filterBasedOnDigits(input) { numZeroes, numOnes -> if (numZeroes <= numOnes) '0' else '1' }
+        return oxygenGenerator.toLong(2) * cO2Scrubber.toLong(2)
     }
 
-    private fun findNumWithDigits(input: List<String>, mostCommon: List<Int>): String {
+    private fun filterBasedOnDigits(input: List<String>, digitSelector: (Int, Int) -> Char): String {
         var currentList = input
-        mostCommon.forEachIndexed { index, digit ->
-            val newList = currentList.filter { it[index].digitToInt() == digit }
-            if (newList.size == 1) {
-                return newList.first()
+        for (index in 0 until input.first().length) {
+            val (numZeroes, numOnes) = countZeroesAndOnes(currentList, index)
+            val digitToKeep = digitSelector(numZeroes, numOnes)
+            if (currentList.size == 1) {
+                return currentList.first()
             } else {
-                currentList = newList
+                currentList = currentList.filter { it[index] == digitToKeep }
             }
         }
-        throw IllegalStateException("Did not find a single value")
+        return currentList.first()
     }
+
+    private fun countZeroesAndOnes(
+        currentOxygenList: List<String>,
+        index: Int
+    ): Pair<Int, Int> {
+        var numZeroes = 0
+        var numOnes = 0
+        currentOxygenList.forEach { line ->
+            if (line[index] == '0') {
+                numZeroes += 1
+            } else if (line[index] == '1') {
+                numOnes += 1
+            }
+        }
+        return Pair(numZeroes, numOnes)
+    }
+
 }
