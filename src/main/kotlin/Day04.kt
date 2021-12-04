@@ -16,7 +16,7 @@ class Day04 : Solver {
         val boards = parseBoards(input)
 
         numbersToCall.forEach { numberToCall ->
-            boards.forEachIndexed { turn, board ->
+            boards.forEach { board ->
                 board.markNumber(numberToCall)
                 if (board.hasWon()) {
                     return numberToCall.toLong() * board.countUnMarked().toLong()
