@@ -79,26 +79,18 @@ class Day04 : Solver {
         }
 
         fun hasWon(): Boolean {
-            fun allMarked(checkRows: List<List<Num>>): Boolean {
-                checkRows.forEach { checkRow ->
-                    if (checkRow.filter { it.marked }.size == checkRow.size) {
-                        return true
-                    }
+            return rows.isAnyCompleted() || transpose(rows).isAnyCompleted()
+        }
+
+        private fun List<List<Num>>.isAnyCompleted(): Boolean {
+            forEach { checkRow ->
+                if (checkRow.filter { it.marked }.size == checkRow.size) {
+                    return true
                 }
-                return false
             }
-
-            if (allMarked(rows)) {
-                return true
-            }
-
-            val columns = transpose(rows)
-            if (allMarked(columns)) {
-                return true
-            }
-
             return false
         }
+
 
         fun countUnMarked(): Int {
             var counter = 0
