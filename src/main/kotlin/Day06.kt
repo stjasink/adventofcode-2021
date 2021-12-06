@@ -20,21 +20,16 @@ class Day06 : Solver {
 
     private fun countFish(input: List<String>, numGenerations: Int): Long {
         val fish = input.first().split(",").map { it.toInt() }
-
-        var fishAges = Array(9) { 0L }
+        var fishAges = Array(9) { 0L }.toMutableList()
         fish.forEach { thisFish ->
             fishAges[thisFish] = fishAges[thisFish] + 1
         }
 
         for (i in 0 until numGenerations) {
-            val newFishAges = Array(9) { 0L }
-
-            for (age in 8 downTo 1) {
-                newFishAges[age - 1] = fishAges[age]
-            }
+            // shift left all ages and add new fish at age 8 for each that was at age 0 before
+            val newFishAges = (fishAges.drop(1) + fishAges[0]).toMutableList()
+            // fish that made new fish will come back at 6
             newFishAges[6] = newFishAges[6] + fishAges[0]
-            newFishAges[8] = newFishAges[8] + fishAges[0]
-
             fishAges = newFishAges
         }
 
