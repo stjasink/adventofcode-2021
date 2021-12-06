@@ -1,6 +1,7 @@
 import common.Solver
 import common.runAndTime
 import common.loadInput
+import kotlin.math.sign
 
 fun main() {
     val input = loadInput("day-05.txt")
@@ -36,12 +37,11 @@ class Day05 : Solver {
         lines.forEach { line ->
             val (startX, startY) = line.first
             val (endX, endY) = line.second
-            val incX = if (startX < endX) 1 else if (startX > endX) -1 else 0
-            val incY = if (startY < endY) 1 else if (startY > endY) -1 else 0
+            val incX = (endX - startX).sign
+            val incY = (endY - startY).sign
 
             var x = startX
             var y = startY
-
             while (x != endX || y != endY) {
                 seaFloorMap[y][x] = seaFloorMap[y][x] + 1
                 x += incX
