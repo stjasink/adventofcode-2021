@@ -11,26 +11,14 @@ fun main() {
 class Day06 : Solver {
 
     override fun part1(input: List<String>): Long {
-        var fish = input.first().split(",").map { it.toInt() }
-
-        for (i in 0 until 80) {
-            val updatedFish = mutableListOf<Int>()
-            val newFish = mutableListOf<Int>()
-            fish.forEach { thisFish ->
-                if (thisFish == 0) {
-                    updatedFish.add(6)
-                    newFish.add(8)
-                } else {
-                    updatedFish.add(thisFish - 1)
-                }
-            }
-            fish = (updatedFish + newFish)
-        }
-
-        return fish.size.toLong()
+        return countFish(input, 80)
     }
 
     override fun part2(input: List<String>): Long {
+        return countFish(input, 256)
+    }
+
+    private fun countFish(input: List<String>, numGenerations: Int): Long {
         val fish = input.first().split(",").map { it.toInt() }
 
         var fishAges = Array(9) { 0L }
@@ -38,11 +26,11 @@ class Day06 : Solver {
             fishAges[thisFish] = fishAges[thisFish] + 1
         }
 
-        for (i in 0 until 256) {
+        for (i in 0 until numGenerations) {
             val newFishAges = Array(9) { 0L }
 
             for (age in 8 downTo 1) {
-                newFishAges[age -1] = fishAges[age]
+                newFishAges[age - 1] = fishAges[age]
             }
             newFishAges[6] = newFishAges[6] + fishAges[0]
             newFishAges[8] = newFishAges[8] + fishAges[0]
