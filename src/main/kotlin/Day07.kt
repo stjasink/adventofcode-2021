@@ -20,8 +20,7 @@ class Day07 : Solver {
     }
 
     private fun parseStartPositions(input: List<String>): List<Int> {
-        val startPositions = input.first().split(",").map { it.toInt() }
-        return startPositions
+        return input.first().split(",").map { it.toInt() }
     }
 
     private fun calculateMinFuelNeeded(startPositions: List<Int>, fuelForMove: (Int) -> Int): Int {
