@@ -28,8 +28,7 @@ class Day07 : Solver {
         val fuelPerPos = Array(maxPos + 1) { Int.MAX_VALUE }
         for (pos in 0 .. maxPos) {
             val fuelPerSub = startPositions.map { fuelForMove((it - pos).absoluteValue) }
-            val totalFuel = fuelPerSub.sum()
-            fuelPerPos[pos] = totalFuel
+            fuelPerPos[pos] = fuelPerSub.sum()
         }
         return fuelPerPos.minOrNull()!!
     }
