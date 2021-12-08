@@ -11,10 +11,10 @@ fun main() {
 class Day08 : Solver {
 
     override fun part1(input: List<String>): Long {
-        val uniqueSegmentNumbers = setOf(2, 3, 4, 7)
+        val uniqueSegmentCounts = setOf(2, 3, 4, 7)
         val counts = input.map { line ->
             val (_, outputs) = line.split(" | ")
-            val uniqueDigits = outputs.split(" ").filter { uniqueSegmentNumbers.contains(it.length) }
+            val uniqueDigits = outputs.split(" ").filter { uniqueSegmentCounts.contains(it.length) }
             uniqueDigits.size
         }
         return counts.sum().toLong()
@@ -22,34 +22,39 @@ class Day08 : Solver {
 
     override fun part2(input: List<String>): Long {
         val counts = input.map { line ->
-
             val (inputPart, outputPart) = line.split(" | ")
             val inputs = inputPart.split(" ")
             val outputs = outputPart.split(" ")
 
-            val digits = mutableMapOf<String, Set<Char>>()
-            digits["1"] = inputs.first{ it.length == 2 }.toSet()
-            digits["7"] = inputs.first{ it.length == 3 }.toSet()
-            digits["4"] = inputs.first{ it.length == 4 }.toSet()
-            digits["8"] = inputs.first{ it.length == 7 }.toSet()
+            // digits with unique segment counts
+            val segments1 = inputs.first{ it.length == 2 }.toSet()
+            val segments7 = inputs.first{ it.length == 3 }.toSet()
+            val segments4 = inputs.first{ it.length == 4 }.toSet()
+            val segments8 = inputs.first{ it.length == 7 }.toSet()
 
-            val fiveSegmentDigits = inputs.filter { it.length == 5 }.map { it.toSet() } // 2, 3, 5
-            digits["3"] = fiveSegmentDigits.first { it.containsAll(digits["1"]!!) }
-            val twoAndFive = fiveSegmentDigits - setOf(digits["3"]!!)
+            // start on five-segment digits
+            val twoThreeAndFive = inputs.filter { it.length == 5 }.map { it.toSet() } // 2, 3, 5
+            val segments3 = twoThreeAndFive.first { it.containsAll(segments1) } // 3 is the only one that overlaps 1
+            val twoAndFive = twoThreeAndFive - setOf(segments3)
 
-            val sixSegmentDigits = inputs.filter { it.length == 6 }.map { it.toSet() } // 0, 6, 9
-            digits["9"] = sixSegmentDigits.first { it.containsAll(digits["4"]!!) }
-            val zeroAndSix = sixSegmentDigits - setOf(digits["9"]!!)
-            digits["0"] = zeroAndSix.first { it.containsAll(digits["1"]!!) }
-            digits["6"] = (zeroAndSix - setOf(digits["0"]!!)).first()
+            // all the six-segment digits
+            val zeroSixAndNine = inputs.filter { it.length == 6 }.map { it.toSet() } // 0, 6, 9
+            val segments9 = zeroSixAndNine.first { it.containsAll(segments4) } // 9 overlaps 4
+            val zeroAndSix = zeroSixAndNine - setOf(segments9)
+            val segments0 = zeroAndSix.first { it.containsAll(segments1) } // 0 overlaps 1
+            val segments6 = zeroAndSix.first { it != segments0 }
 
-            digits["5"] = twoAndFive.first { (it - digits["6"]!!).isEmpty() }
-            digits["2"] = (twoAndFive - setOf(digits["5"]!!)).first()
+            // finish five-segment digits
+            val segments5 = twoAndFive.first { (it - segments6).isEmpty() } // 6 is a superset of 5
+            val segments2 = twoAndFive.first { it != segments5 }
 
-            val setsToDigits = digits.map { it.value to it.key }.toMap()
+            val segmentsToDigits = mapOf(
+                segments0 to "0", segments1 to "1", segments2 to "2", segments3 to "3", segments4 to "4",
+                segments5 to "5", segments6 to "6", segments7 to "7", segments8 to "8", segments9 to "9"
+            )
 
             val number = outputs.map {
-                setsToDigits[it.toSet()]
+                segmentsToDigits[it.toSet()]
             }.joinToString("").toInt()
 
             number
@@ -58,5 +63,4 @@ class Day08 : Solver {
         return counts.sum().toLong()
     }
 
-    private fun String.sorted(): String = this.toCharArray().sorted().joinToString("")
 }
