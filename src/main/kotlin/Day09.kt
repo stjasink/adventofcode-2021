@@ -48,7 +48,7 @@ class Day09 : Solver {
     }
 
     private fun countNonNines(grid: List<List<Int>>, rowNum: Int, colNum: Int, alreadySeen: MutableList<Pair<Int, Int>>): Int {
-        if (alreadySeen.contains(Pair(rowNum, colNum)) || rowNum == -1 || colNum == -1 || rowNum == grid.size || colNum == grid.first().size || grid[rowNum][colNum] == 9 ) {
+        if (alreadySeen.contains(Pair(rowNum, colNum)) || rowNum == -1 || colNum == -1 || rowNum == grid.size || colNum == grid.first().size || grid[rowNum][colNum] == 9) {
             return 0
         }
         alreadySeen.add(Pair(rowNum, colNum))
@@ -66,31 +66,11 @@ class Day09 : Solver {
     }
 
     private fun findNeighbours(grid: List<List<Int>>, rowNum: Int, colNum: Int): List<Int> {
-        if (rowNum == 0) {
-            return if (colNum == 0) {
-                listOf(grid[rowNum][colNum+1], grid[rowNum+1][colNum])
-            } else if (colNum == grid.first().size - 1) {
-                listOf(grid[rowNum][colNum-1], grid[rowNum+1][colNum])
-            } else {
-                listOf(grid[rowNum][colNum-1], grid[rowNum][colNum+1], grid[rowNum+1][colNum])
-            }
-        } else if (rowNum == grid.size - 1) {
-            return if (colNum == 0) {
-                listOf(grid[rowNum][colNum+1], grid[rowNum-1][colNum])
-            } else if (colNum == grid.first().size - 1) {
-                listOf(grid[rowNum][colNum-1], grid[rowNum-1][colNum])
-            } else {
-                listOf(grid[rowNum][colNum-1], grid[rowNum][colNum+1], grid[rowNum-1][colNum])
-            }
-        } else {
-            return if (colNum == 0) {
-                listOf(grid[rowNum][colNum+1], grid[rowNum+1][colNum], grid[rowNum-1][colNum])
-            } else if (colNum == grid.first().size - 1) {
-                listOf(grid[rowNum][colNum-1], grid[rowNum+1][colNum], grid[rowNum-1][colNum])
-            } else {
-                listOf(grid[rowNum][colNum-1], grid[rowNum][colNum+1], grid[rowNum+1][colNum], grid[rowNum-1][colNum])
-            }
-        }
+        val leftNeighbour = if (colNum > 0) grid[rowNum][colNum-1] else null
+        val rightNeighbour = if (colNum < grid.first().size - 1) grid[rowNum][colNum+1] else null
+        val topNeighbour = if (rowNum > 0) grid[rowNum-1][colNum] else null
+        val bottomNeighbour = if (rowNum < grid.size - 1) grid[rowNum+1][colNum] else null
+        return listOfNotNull(leftNeighbour, rightNeighbour, topNeighbour, bottomNeighbour)
     }
 
 
