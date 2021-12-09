@@ -33,41 +33,31 @@ class Day09 : Solver {
             row.toCharArray().map { it.toString().toInt() }
         }
 
-        val numRows = grid.size
-        val numCols = grid.first().size
-
         val basinSizes = mutableListOf<Long>()
 
         grid.forEachIndexed { rowNum, row ->
-            row.forEachIndexed { colNum, col ->
+            row.forEachIndexed { colNum, _ ->
                 if (isLowPoint(grid, rowNum, colNum)) {
-                    val alreadySeen = mutableListOf(Pair(rowNum, colNum))
-                    val countLeft = if (colNum > 0) countNonNines(grid, rowNum, colNum-1, alreadySeen) else 0
-                    val countRight = if (colNum < numCols - 1) countNonNines(grid, rowNum, colNum+1, alreadySeen) else 0
-                    val countUp = if (rowNum > 0) countNonNines(grid, rowNum-1, colNum, alreadySeen) else 0
-                    val countDown = if (rowNum < numRows - 1) countNonNines(grid, rowNum+1, colNum, alreadySeen) else 0
-                    val basinSize = countLeft + countRight + countUp + countDown + 1
+                    val basinSize = countNonNines(grid, rowNum, colNum, emptyList<Pair<Int, Int>>().toMutableList())
                     basinSizes.add(basinSize.toLong())
                 }
             }
         }
 
-        val threeLargest = basinSizes.sortedDescending().take(3)
-
-        return threeLargest.reduce { acc, i ->  acc * i }
+        return basinSizes.sortedDescending().take(3).reduce { acc, i ->  acc * i }
     }
 
     private fun countNonNines(grid: List<List<Int>>, rowNum: Int, colNum: Int, alreadySeen: MutableList<Pair<Int, Int>>): Int {
-        if (alreadySeen.contains(Pair(rowNum, colNum)) || grid[rowNum][colNum] == 9) {
+        if (alreadySeen.contains(Pair(rowNum, colNum)) || rowNum == -1 || colNum == -1 || rowNum == grid.size || colNum == grid.first().size || grid[rowNum][colNum] == 9 ) {
             return 0
         }
-        var count = 1
         alreadySeen.add(Pair(rowNum, colNum))
-        if (!alreadySeen.contains(Pair(rowNum, colNum-1)) && colNum > 0) count += countNonNines(grid, rowNum, colNum-1, alreadySeen)
-        if (!alreadySeen.contains(Pair(rowNum, colNum+1)) && colNum < grid.first().size - 1) count += countNonNines(grid, rowNum, colNum+1, alreadySeen)
-        if (!alreadySeen.contains(Pair(rowNum-1, colNum)) && rowNum > 0) count += countNonNines(grid, rowNum-1, colNum, alreadySeen)
-        if (!alreadySeen.contains(Pair(rowNum+1, colNum)) && rowNum < grid.size - 1) count += countNonNines(grid, rowNum+1, colNum, alreadySeen)
-        return count
+        return 1 +
+                countNonNines(grid, rowNum, colNum-1, alreadySeen) +
+                countNonNines(grid, rowNum, colNum+1, alreadySeen) +
+                countNonNines(grid, rowNum-1, colNum, alreadySeen) +
+                countNonNines(grid, rowNum+1, colNum, alreadySeen)
+
     }
 
     private fun isLowPoint(grid: List<List<Int>>, rowNum: Int, colNum: Int): Boolean {
