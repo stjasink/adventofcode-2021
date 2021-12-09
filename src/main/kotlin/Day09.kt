@@ -18,14 +18,14 @@ class Day09 : Solver {
         val lowPoints = mutableListOf<Int>()
 
         grid.forEachIndexed { rowNum, row ->
-            row.forEachIndexed { colNum, col ->
+            row.forEachIndexed { colNum, _ ->
                 if (isLowPoint(grid, rowNum, colNum)) {
                     lowPoints += grid[rowNum][colNum]
                 }
              }
         }
 
-        return lowPoints.map { it + 1 }.sum().toLong()
+        return lowPoints.sumOf { it + 1 }.toLong()
     }
 
     override fun part2(input: List<String>): Long {
@@ -57,7 +57,6 @@ class Day09 : Solver {
                 countNonNines(grid, rowNum, colNum+1, alreadySeen) +
                 countNonNines(grid, rowNum-1, colNum, alreadySeen) +
                 countNonNines(grid, rowNum+1, colNum, alreadySeen)
-
     }
 
     private fun isLowPoint(grid: List<List<Int>>, rowNum: Int, colNum: Int): Boolean {
