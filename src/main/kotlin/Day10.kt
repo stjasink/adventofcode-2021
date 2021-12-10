@@ -25,28 +25,19 @@ class Day10 : Solver {
     }
 
     private fun findCompletionScore(line: String): Long {
-        val openers = mutableListOf<Char>()
+        val foundUnmatched = mutableListOf<Char>()
         line.toCharArray().forEach { c ->
             when (c) {
-                '(', '[', '{', '<' -> openers.add(c)
-                ')' -> if (openers.removeLast() != '(') { throw IllegalStateException("Oops") }
-                ']' -> if (openers.removeLast() != '[') { throw IllegalStateException("Oops") }
-                '}' -> if (openers.removeLast() != '{') { throw IllegalStateException("Oops") }
-                '>' -> if (openers.removeLast() != '<') { throw IllegalStateException("Oops") }
+                '(', '[', '{', '<' -> foundUnmatched.add(c)
+                ')', ']', '}', '>' -> foundUnmatched.removeLast()
             }
         }
 
-        return openers
+        val bracketScores = mapOf('(' to 1L, '[' to 2L, '{' to 3L, '<' to 4L)
+        return foundUnmatched
             .reversed()
-            .map { c ->
-                when (c) {
-                    '(' -> 1L
-                    '[' -> 2L
-                    '{' -> 3L
-                    '<' -> 4L
-                    else -> throw IllegalStateException("Unexpected char $c")
-                }
-            }.reduce { acc, i -> (acc * 5) + i }
+            .map { c -> bracketScores[c]!! }
+            .reduce { acc, i -> (acc * 5) + i }
     }
 
     private fun findUnmatchedScore(line: String): Long {
