@@ -11,32 +11,24 @@ fun main() {
 class Day10 : Solver {
 
     override fun part1(input: List<String>): Long {
-        var score = 0L
-        input.forEach { line ->
-            score += findUnmatchedScore(line)
-        }
-        return score
+        return input.map { line ->
+            findUnmatchedScore(line)
+        }.sumOf { it }
     }
 
     override fun part2(input: List<String>): Long {
-        val scores = mutableListOf<Long>()
         val incompleteLines = input.filter { findUnmatchedScore(it) == 0L }
-
-        incompleteLines.forEach { line ->
-            val score = findCompletionScore(line)
-            scores.add(score)
+        val scores = incompleteLines.map { line ->
+            findCompletionScore(line)
         }
-
-        val middleIndex = scores.size / 2
-        val sortedScores = scores.sorted()
-        return sortedScores[middleIndex]
+        return scores.sorted()[scores.size / 2]
     }
 
     private fun findCompletionScore(line: String): Long {
-        val openers = ArrayDeque<Char>()
+        val openers = mutableListOf<Char>()
         line.toCharArray().forEach { c ->
             when (c) {
-                '(', '[', '{', '<' -> openers.addLast(c)
+                '(', '[', '{', '<' -> openers.add(c)
                 ')' -> if (openers.removeLast() != '(') { throw IllegalStateException("Oops") }
                 ']' -> if (openers.removeLast() != '[') { throw IllegalStateException("Oops") }
                 '}' -> if (openers.removeLast() != '{') { throw IllegalStateException("Oops") }
@@ -44,29 +36,28 @@ class Day10 : Solver {
             }
         }
 
-        var score = 0L
-        while (openers.isNotEmpty()) {
-            score *= 5
-            when (openers.removeLast()) {
-                '(' -> score += 1
-                '[' -> score += 2
-                '{' -> score += 3
-                '<' -> score += 4
-            }
-        }
-
-        return score
+        return openers
+            .reversed()
+            .map { c ->
+                when (c) {
+                    '(' -> 1L
+                    '[' -> 2L
+                    '{' -> 3L
+                    '<' -> 4L
+                    else -> throw IllegalStateException("Unexpected char $c")
+                }
+            }.reduce { acc, i -> (acc * 5) + i }
     }
 
     private fun findUnmatchedScore(line: String): Long {
-        val openers = ArrayDeque<Char>()
+        val openers = mutableListOf<Char>()
         line.toCharArray().forEach { c ->
             when (c) {
-                '(', '[', '{', '<' -> openers.addLast(c)
-                ')' -> if (openers.removeLast() != '(') {  return 3L }
-                ']' -> if (openers.removeLast() != '[') { return 57L }
-                '}' -> if (openers.removeLast() != '{') {   return 1197L }
-                '>' -> if (openers.removeLast() != '<') { return 25137L }
+                '(', '[', '{', '<' -> openers.add(c)
+                ')' -> if (openers.removeLast() != '(') return 3L
+                ']' -> if (openers.removeLast() != '[') return 57L
+                '}' -> if (openers.removeLast() != '{') return 1197L
+                '>' -> if (openers.removeLast() != '<') return 25137L
             }
         }
         return 0
