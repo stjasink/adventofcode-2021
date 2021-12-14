@@ -42,21 +42,17 @@ class Day14 : Solver {
             pairCount = newPairCount
         }
 
-        val letterCounts = mutableMapOf<Char, Long>()
-        pairCount.forEach { (pair, count) ->
-            val letter = pair.first()
-            if (letterCounts[letter] == null) {
-                letterCounts[letter] = count
-            } else {
-                letterCounts[letter] = letterCounts[letter]!! + count
-            }
-        }
-        val finalLetter = startString.last()
+        val letterCounts = pairCount
+            .map { it.key.first() to it.value } // only count first letter because pairs overlap
+            .groupBy { it.first }
+            .map { entry -> entry.key to entry.value.sumOf { it.second } }
+            .toMap()
+            .toMutableMap()
+        val finalLetter = startString.last() // need to increment last letter's count because it doesn't overlap
         letterCounts[finalLetter] = letterCounts[finalLetter]!! + 1
 
         val minCount = letterCounts.minByOrNull { it.value }!!.value
         val maxCount = letterCounts.maxByOrNull { it.value }!!.value
-
         return maxCount - minCount
     }
 }
