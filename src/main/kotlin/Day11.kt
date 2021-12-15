@@ -62,7 +62,7 @@ class Day11 : Solver {
 
             // flash
             var startFlashCount = flashCount
-            var newFlashes = 0L
+            var newFlashes: Long
             do {
                 for (rowNum in 0 until 10) {
                     for (colNum in 0 until 10) {
@@ -133,7 +133,7 @@ class Day11 : Solver {
 
             // flash
             var startFlashCount = flashCount
-            var newFlashes = 0L
+            var newFlashes: Long
             do {
                 for (rowNum in 0 until 10) {
                     for (colNum in 0 until 10) {
