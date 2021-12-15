@@ -27,11 +27,12 @@ class Day15 : Solver {
 
     class Grid(input: List<String>, expandTimes: Int) {
 
-        val cellDistances: Map<Point, Int>
-        val visited: MutableSet<Point>
-        val tentativeDistances: MutableMap<Point, Int>
-        val maxY: Int
-        val maxX: Int
+        private val cellDistances: Map<Point, Int>
+        private val visited: MutableSet<Point>
+        private val tentativeDistances: MutableMap<Point, Int>
+        private val maxY: Int
+        private val maxX: Int
+        private val calculatedAndUnvisited: MutableMap<Point, Int> = mutableMapOf()
 
         init {
             val grid0 = mutableMapOf<Point, Int>()
@@ -40,44 +41,32 @@ class Day15 : Solver {
                     grid0[Point(x, y)] = c.digitToInt()
                 }
             }
-            if (expandTimes == 1) {
-                cellDistances = grid0
-                maxY = input.size - 1
-                maxX = input[0].length - 1
-            } else {
-                val grid0SizeY = input.size
-                val grid0SizeX = input[0].length
-                val expandedGrid = mutableMapOf<Point, Int>()
-                for (x in 0 until expandTimes) {
-                    for (y in 0 until expandTimes) {
-                        grid0.forEach { (point, risk0) ->
-                            val newX = point.x + (grid0SizeX * x)
-                            val newY = point.y + (grid0SizeY * y)
-                            val newPoint = Point(newX, newY)
-                            val newRisk = (risk0 + x + y)
-                            val newRiskLooped = if (newRisk > 9) (newRisk % 10) + 1 else newRisk
-                            expandedGrid[newPoint] = newRiskLooped
-                        }
-                    }
-                }
-                maxY = grid0SizeY * expandTimes - 1
-                maxX = grid0SizeX * expandTimes - 1
-                cellDistances = expandedGrid
-            }
 
-//            for (y in 0..maxY) {
-//                for (x in 0..maxX) {
-//                    print(cellDistances[Point(x, y)])
-//                }
-//                println()
-//            }
-//            println()
+            cellDistances = expandGrid(grid0, expandTimes)
+            maxY = cellDistances.keys.maxOf { it.y }
+            maxX = cellDistances.keys.maxOf { it.x }
 
             visited = mutableSetOf()
             tentativeDistances = mutableMapOf()
-            cellDistances.forEach { (key, _) ->
-                tentativeDistances[key] = Int.MAX_VALUE
+        }
+
+        private fun expandGrid(grid0: MutableMap<Point, Int>, expandTimes: Int): Map<Point, Int> {
+            val grid0SizeY = grid0.keys.maxOf { it.y } + 1
+            val grid0SizeX = grid0.keys.maxOf { it.x } + 1
+            val expandedGrid = mutableMapOf<Point, Int>()
+            for (x in 0 until expandTimes) {
+                for (y in 0 until expandTimes) {
+                    grid0.forEach { (point, risk0) ->
+                        val newX = point.x + (grid0SizeX * x)
+                        val newY = point.y + (grid0SizeY * y)
+                        val newPoint = Point(newX, newY)
+                        val newRisk = (risk0 + x + y)
+                        val newRiskLooped = if (newRisk > 9) (newRisk % 10) + 1 else newRisk
+                        expandedGrid[newPoint] = newRiskLooped
+                    }
+                }
             }
+            return expandedGrid
         }
 
         fun findDistance(): Int {
@@ -85,44 +74,45 @@ class Day15 : Solver {
             val end = Point(maxX, maxY)
             tentativeDistances[start] = 0
 
-            println("Number of points: ${cellDistances.size}")
-
-            setNeighbourDistancesFor(start, 0)
+            setNeighbourDistancesFor(start)
             while (visited.size < cellDistances.size) {
                 val point = lowestDistanceUnvisitedPoint()
                 if (point == end) {
                     return tentativeDistances[point]!!
                 }
-                setNeighbourDistancesFor(point, tentativeDistances[point]!!)
+                setNeighbourDistancesFor(point)
                 visited.add(point)
-                if (visited.size % 100 == 0) {
-                    println("Visited ${visited.size}")
-                }
+                calculatedAndUnvisited.remove(point)
             }
 
             return 0
         }
 
-        fun lowestDistanceUnvisitedPoint(): Point {
-            return tentativeDistances
-                .filterKeys { !visited.contains(it) }
+        private fun lowestDistanceUnvisitedPoint(): Point {
+            return calculatedAndUnvisited
                 .minByOrNull { it.value }!!
                 .key
         }
 
-        fun setNeighbourDistancesFor(point: Point, distanceSoFar: Int) {
+        private fun setNeighbourDistancesFor(point: Point) {
             val neighbours = point.getNeighbours()
             neighbours.forEach { neighbour ->
                 if (!visited.contains(neighbour)) {
                     val neighbourDistance = cellDistances[neighbour]!! + tentativeDistances[point]!!
-                    if (neighbourDistance < tentativeDistances[neighbour]!!) {
+                    if (tentativeDistances[neighbour] == null) {
                         tentativeDistances[neighbour] = neighbourDistance
+                        calculatedAndUnvisited[neighbour] = neighbourDistance
+                    } else {
+                        if (neighbourDistance < tentativeDistances[neighbour]!!) {
+                            tentativeDistances[neighbour] = neighbourDistance
+                            calculatedAndUnvisited[neighbour] = neighbourDistance
+                        }
                     }
                 }
             }
         }
 
-        fun Point.getNeighbours(): List<Point> {
+        private fun Point.getNeighbours(): List<Point> {
             val neighbours = mutableListOf<Point>()
             if (x > 0) neighbours.add(Point(x-1, y))
             if (y > 0) neighbours.add(Point(x, y-1))
