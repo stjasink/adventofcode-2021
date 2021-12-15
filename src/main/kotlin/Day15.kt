@@ -26,13 +26,12 @@ class Day15 : Solver {
     )
 
     class Grid(input: List<String>, expandTimes: Int) {
-
-        private val cellDistances: Map<Point, Int>
-        private val visited: MutableSet<Point>
-        private val tentativeDistances: MutableMap<Point, Int>
+        private val individualDistances: Map<Point, Int>
+        private val visited: MutableSet<Point> = mutableSetOf()
+        private val tentativeDistances: MutableMap<Point, Int> = mutableMapOf()
+        private val calculatedUnvisitedDistances: MutableMap<Point, Int> = mutableMapOf()
         private val maxY: Int
         private val maxX: Int
-        private val calculatedAndUnvisited: MutableMap<Point, Int> = mutableMapOf()
 
         init {
             val grid0 = mutableMapOf<Point, Int>()
@@ -42,12 +41,13 @@ class Day15 : Solver {
                 }
             }
 
-            cellDistances = expandGrid(grid0, expandTimes)
-            maxY = cellDistances.keys.maxOf { it.y }
-            maxX = cellDistances.keys.maxOf { it.x }
+            individualDistances = expandGrid(grid0, expandTimes)
+            maxY = individualDistances.keys.maxOf { it.y }
+            maxX = individualDistances.keys.maxOf { it.x }
 
-            visited = mutableSetOf()
-            tentativeDistances = mutableMapOf()
+            individualDistances.forEach { (key, _) ->
+                tentativeDistances[key] = Int.MAX_VALUE
+            }
         }
 
         private fun expandGrid(grid0: MutableMap<Point, Int>, expandTimes: Int): Map<Point, Int> {
@@ -75,21 +75,21 @@ class Day15 : Solver {
             tentativeDistances[start] = 0
 
             setNeighbourDistancesFor(start)
-            while (visited.size < cellDistances.size) {
+            while (visited.size < individualDistances.size) {
                 val point = lowestDistanceUnvisitedPoint()
                 if (point == end) {
                     return tentativeDistances[point]!!
                 }
                 setNeighbourDistancesFor(point)
                 visited.add(point)
-                calculatedAndUnvisited.remove(point)
+                calculatedUnvisitedDistances.remove(point)
             }
 
             return 0
         }
 
         private fun lowestDistanceUnvisitedPoint(): Point {
-            return calculatedAndUnvisited
+            return calculatedUnvisitedDistances
                 .minByOrNull { it.value }!!
                 .key
         }
@@ -98,15 +98,10 @@ class Day15 : Solver {
             val neighbours = point.getNeighbours()
             neighbours.forEach { neighbour ->
                 if (!visited.contains(neighbour)) {
-                    val neighbourDistance = cellDistances[neighbour]!! + tentativeDistances[point]!!
-                    if (tentativeDistances[neighbour] == null) {
+                    val neighbourDistance = individualDistances[neighbour]!! + tentativeDistances[point]!!
+                    if (neighbourDistance < tentativeDistances[neighbour]!!) {
                         tentativeDistances[neighbour] = neighbourDistance
-                        calculatedAndUnvisited[neighbour] = neighbourDistance
-                    } else {
-                        if (neighbourDistance < tentativeDistances[neighbour]!!) {
-                            tentativeDistances[neighbour] = neighbourDistance
-                            calculatedAndUnvisited[neighbour] = neighbourDistance
-                        }
+                        calculatedUnvisitedDistances[neighbour] = neighbourDistance
                     }
                 }
             }
