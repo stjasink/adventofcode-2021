@@ -7,7 +7,7 @@ class Day16Test {
     fun part1TestLiteralPacket() {
         val input = "110100101111111000101000"
 
-        val answer = Day16().parsePacket(input, 0)
+        val answer = Day16().parseAndCalculatePacket(input, 0)
         assertEquals(6, answer.version)
         assertEquals(4, answer.type)
         assertEquals(2021, answer.number!!)
@@ -17,7 +17,7 @@ class Day16Test {
     fun part1TestOperatorPacketLength0() {
         val input = "00111000000000000110111101000101001010010001001000000000"
 
-        val answer = Day16().parsePacket(input, 0)
+        val answer = Day16().parseAndCalculatePacket(input, 0)
         assertEquals(1, answer.version)
         assertEquals(6, answer.type)
         assertEquals(2, answer.subPackets.size)
@@ -30,7 +30,7 @@ class Day16Test {
     fun part1TestOperatorPacketLength1() {
         val input = "11101110000000001101010000001100100000100011000001100000"
 
-        val answer = Day16().parsePacket(input, 0)
+        val answer = Day16().parseAndCalculatePacket(input, 0)
         assertEquals(7, answer.version)
         assertEquals(3, answer.type)
         assertEquals(3, answer.subPackets.size)

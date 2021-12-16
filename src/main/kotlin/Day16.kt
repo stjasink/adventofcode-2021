@@ -11,18 +11,11 @@ fun main() {
 class Day16 : Solver {
 
     override fun part1(input: List<String>): Long {
-        val bits = input.first().toCharArray().map { hex ->
+        val bits = input.first().toCharArray().joinToString("") { hex ->
             hex.toString().toInt(16).toString(2).padStart(4, '0')
-        }.joinToString("")
-
-        val allPackets = mutableListOf<Packet>()
-        var startPos = 0
-        // could have up to 3 zeroes at the end for padding
-        while (startPos < (bits.length - 7)) {
-            val packet = parsePacket(bits, startPos)
-            allPackets.add(packet)
-            startPos += packet.size
         }
+
+        val packet = parseAndCalculatePacket(bits, 0)
 
         var sumOfVersions = 0
         fun addVersions(packets: List<Packet>) {
@@ -31,30 +24,21 @@ class Day16 : Solver {
                 addVersions(packet.subPackets)
             }
         }
-        addVersions(allPackets)
+        addVersions(listOf(packet))
 
         return sumOfVersions.toLong()
-
     }
 
     override fun part2(input: List<String>): Long {
-        val bits = input.first().toCharArray().map { hex ->
+        val bits = input.first().toCharArray().joinToString("") { hex ->
             hex.toString().toInt(16).toString(2).padStart(4, '0')
-        }.joinToString("")
-
-        val allPackets = mutableListOf<Packet>()
-        var startPos = 0
-        // could have up to 3 zeroes at the end for padding
-        while (startPos < (bits.length - 7)) {
-            val packet = parsePacket(bits, startPos)
-            allPackets.add(packet)
-            startPos += packet.size
         }
 
-        return allPackets.first().number
+        val packet = parseAndCalculatePacket(bits, 0)
+        return packet.number
     }
 
-    fun parsePacket(bits: String, startBit: Int): Packet  {
+    fun parseAndCalculatePacket(bits: String, startBit: Int): Packet  {
         val version = bits.substring(startBit, startBit + 3).toInt(2)
         val type = bits.substring(startBit + 3, startBit + 6).toInt(2)
         val restOfBits = bits.substring(startBit + 6)
@@ -68,22 +52,21 @@ class Day16 : Solver {
             val lengthType = restOfBits.first()
             var subPacketLengths = 0
             val subPackets = mutableListOf<Packet>()
-            var thisPacketLength = 0
+            val thisPacketLength: Int
             if (lengthType == '0') {
                 val lengthBits = restOfBits.drop(1).take(15)
                 val length = lengthBits.toInt(2)
                 while (subPacketLengths < length) {
-                    val subPacket = parsePacket(restOfBits, 16 + subPacketLengths)
+                    val subPacket = parseAndCalculatePacket(restOfBits, 16 + subPacketLengths)
                     subPackets.add(subPacket)
                     subPacketLengths += subPacket.size
                 }
                 thisPacketLength = 6 + 16 + subPacketLengths
-
             } else {
                 val numSubPacketBits = restOfBits.drop(1).take(11)
                 val numSubPackets = numSubPacketBits.toInt(2)
                 for (subPacketNum in 0 until numSubPackets) {
-                    val subPacket = parsePacket(restOfBits, 12 + subPacketLengths)
+                    val subPacket = parseAndCalculatePacket(restOfBits, 12 + subPacketLengths)
                     subPackets.add(subPacket)
                     subPacketLengths += subPacket.size
                 }
