@@ -11,29 +11,13 @@ fun main() {
 class Day16 : Solver {
 
     override fun part1(input: List<String>): Long {
-        val bits = input.first().toCharArray().joinToString("") { hex ->
-            hex.toString().toInt(16).toString(2).padStart(4, '0')
-        }
-
+        val bits = parseBitsFromHex(input)
         val packet = parseAndCalculatePacket(bits, 0)
-
-        var sumOfVersions = 0
-        fun addVersions(packets: List<Packet>) {
-            packets.forEach { packet ->
-                sumOfVersions += packet.version
-                addVersions(packet.subPackets)
-            }
-        }
-        addVersions(listOf(packet))
-
-        return sumOfVersions.toLong()
+        return packet.sumAllVersions().toLong()
     }
 
     override fun part2(input: List<String>): Long {
-        val bits = input.first().toCharArray().joinToString("") { hex ->
-            hex.toString().toInt(16).toString(2).padStart(4, '0')
-        }
-
+        val bits = parseBitsFromHex(input)
         val packet = parseAndCalculatePacket(bits, 0)
         return packet.number
     }
@@ -103,11 +87,22 @@ class Day16 : Solver {
         throw IllegalStateException("Did not find end of number in $bits")
     }
 
+    private fun parseBitsFromHex(input: List<String>): String {
+        val bits = input.first().toCharArray().joinToString("") { hex ->
+            hex.toString().toInt(16).toString(2).padStart(4, '0')
+        }
+        return bits
+    }
+
     data class Packet(
         val version: Int,
         val type: Int,
         val number: Long,
         val size: Int,
         val subPackets: List<Packet>
-    )
+    ) {
+        fun sumAllVersions(): Int {
+            return version + subPackets.sumOf { it.sumAllVersions() }
+        }
+    }
 }
