@@ -1,6 +1,7 @@
 import common.Solver
 import common.runAndTime
 import common.loadInput
+import java.util.*
 
 fun main() {
     val input = loadInput("day-15.txt")
@@ -29,7 +30,7 @@ class Day15 : Solver {
         private val individualDistances: Map<Point, Int>
         private val visited: MutableSet<Point> = mutableSetOf()
         private val tentativeDistances: MutableMap<Point, Int> = mutableMapOf()
-        private val calculatedUnvisitedDistances: MutableMap<Point, Int> = mutableMapOf()
+        private val calculatedUnvisitedDistances = PriorityQueue<Pair<Int, Point>> { o1, o2 -> o1.first.compareTo(o2.first) }
         private val maxY: Int
         private val maxX: Int
 
@@ -76,32 +77,24 @@ class Day15 : Solver {
 
             setNeighbourDistancesFor(start)
             while (visited.size < individualDistances.size) {
-                val point = lowestDistanceUnvisitedPoint()
+                val point = calculatedUnvisitedDistances.remove().second
                 if (point == end) {
                     return tentativeDistances[point]!!
                 }
                 setNeighbourDistancesFor(point)
                 visited.add(point)
-                calculatedUnvisitedDistances.remove(point)
             }
 
-            return 0
-        }
-
-        private fun lowestDistanceUnvisitedPoint(): Point {
-            return calculatedUnvisitedDistances
-                .minByOrNull { it.value }!!
-                .key
+            throw IllegalStateException("Could not get to the end")
         }
 
         private fun setNeighbourDistancesFor(point: Point) {
-            val neighbours = point.getNeighbours()
-            neighbours.forEach { neighbour ->
+            point.getNeighbours().forEach { neighbour ->
                 if (!visited.contains(neighbour)) {
                     val neighbourDistance = individualDistances[neighbour]!! + tentativeDistances[point]!!
                     if (neighbourDistance < tentativeDistances[neighbour]!!) {
                         tentativeDistances[neighbour] = neighbourDistance
-                        calculatedUnvisitedDistances[neighbour] = neighbourDistance
+                        calculatedUnvisitedDistances.add(Pair(neighbourDistance, neighbour))
                     }
                 }
             }
