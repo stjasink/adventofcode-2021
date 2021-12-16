@@ -38,7 +38,20 @@ class Day16 : Solver {
     }
 
     override fun part2(input: List<String>): Long {
-        return 0L
+        val bits = input.first().toCharArray().map { hex ->
+            hex.toString().toInt(16).toString(2).padStart(4, '0')
+        }.joinToString("")
+
+        val allPackets = mutableListOf<Packet>()
+        var startPos = 0
+        // could have up to 3 zeroes at the end for padding
+        while (startPos < (bits.length - 7)) {
+            val packet = parsePacket(bits, startPos)
+            allPackets.add(packet)
+            startPos += packet.size
+        }
+
+        return allPackets.first().number
     }
 
     fun parsePacket(bits: String, startBit: Int): Packet  {
@@ -53,32 +66,41 @@ class Day16 : Solver {
             return Packet(version, type, number, 6 + length, emptyList())
         } else {
             val lengthType = restOfBits.first()
+            var subPacketLengths = 0
+            val subPackets = mutableListOf<Packet>()
+            var thisPacketLength = 0
             if (lengthType == '0') {
                 val lengthBits = restOfBits.drop(1).take(15)
                 val length = lengthBits.toInt(2)
-                var subPacketLengths = 0
-                val subPackets = mutableListOf<Packet>()
                 while (subPacketLengths < length) {
                     val subPacket = parsePacket(restOfBits, 16 + subPacketLengths)
                     subPackets.add(subPacket)
                     subPacketLengths += subPacket.size
                 }
-                val thisPacketLength = 6 + 16 + subPacketLengths
-                return Packet(version, type, null, thisPacketLength, subPackets)
+                thisPacketLength = 6 + 16 + subPacketLengths
+
             } else {
                 val numSubPacketBits = restOfBits.drop(1).take(11)
                 val numSubPackets = numSubPacketBits.toInt(2)
-                var subPacketLengths = 0
-                val subPackets = mutableListOf<Packet>()
                 for (subPacketNum in 0 until numSubPackets) {
                     val subPacket = parsePacket(restOfBits, 12 + subPacketLengths)
                     subPackets.add(subPacket)
                     subPacketLengths += subPacket.size
                 }
-                val thisPacketLength = 6 + 12 + subPacketLengths
-                return Packet(version, type, null, thisPacketLength, subPackets)
+                thisPacketLength = 6 + 12 + subPacketLengths
             }
 
+            val number = when (type) {
+                0 -> subPackets.sumOf { it.number }
+                1 -> subPackets.fold(1L) { acc, packet -> acc * packet.number }
+                2 -> subPackets.minOf { it.number }
+                3 -> subPackets.maxOf { it.number }
+                5 -> if (subPackets[0].number > subPackets[1].number) 1L else 0L
+                6 -> if (subPackets[0].number < subPackets[1].number) 1L else 0L
+                7 -> if (subPackets[0].number == subPackets[1].number) 1L else 0L
+                else -> throw IllegalStateException("Unexpected type $type")
+            }
+            return Packet(version, type, number, thisPacketLength, subPackets)
         }
 
     }
@@ -101,7 +123,7 @@ class Day16 : Solver {
     data class Packet(
         val version: Int,
         val type: Int,
-        val number: Long?,
+        val number: Long,
         val size: Int,
         val subPackets: List<Packet>
     )

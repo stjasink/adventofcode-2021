@@ -81,11 +81,82 @@ class Day16Test {
     }
 
     @Test
-    fun part2Test() {
+    fun part2Test1() {
         val input = """
+            C200B40A82
+        """.trimIndent().split('\n')
+
+        val answer = Day16().part2(input)
+        assertEquals(3L, answer)
+    }
+
+    @Test
+    fun part2Test2() {
+        val input = """
+            04005AC33890
+        """.trimIndent().split('\n')
+
+        val answer = Day16().part2(input)
+        assertEquals(54L, answer)
+    }
+
+    @Test
+    fun part2Test3() {
+        val input = """
+            880086C3E88112
+        """.trimIndent().split('\n')
+
+        val answer = Day16().part2(input)
+        assertEquals(7L, answer)
+    }
+
+    @Test
+    fun part2Test4() {
+        val input = """
+            CE00C43D881120
+        """.trimIndent().split('\n')
+
+        val answer = Day16().part2(input)
+        assertEquals(9L, answer)
+    }
+
+    @Test
+    fun part2Test5() {
+        val input = """
+            D8005AC2A8F0
+        """.trimIndent().split('\n')
+
+        val answer = Day16().part2(input)
+        assertEquals(1L, answer)
+    }
+
+    @Test
+    fun part2Test6() {
+        val input = """
+            F600BC2D8F
         """.trimIndent().split('\n')
 
         val answer = Day16().part2(input)
         assertEquals(0L, answer)
+    }
+
+    @Test
+    fun part2Test7() {
+        val input = """
+            9C005AC2F8F0
+        """.trimIndent().split('\n')
+
+        val answer = Day16().part2(input)
+        assertEquals(0L, answer)
+    }
+
+    @Test
+    fun part2Test8() {
+        val input = """
+            9C0141080250320F1802104A08
+        """.trimIndent().split('\n')
+
+        val answer = Day16().part2(input)
+        assertEquals(1L, answer)
     }
 }
