@@ -10,7 +10,7 @@ class Day16Test {
         val answer = Day16().parseAndCalculatePacket(input, 0)
         assertEquals(6, answer.version)
         assertEquals(4, answer.type)
-        assertEquals(2021, answer.number!!)
+        assertEquals(2021, answer.number)
     }
 
     @Test
@@ -22,8 +22,8 @@ class Day16Test {
         assertEquals(6, answer.type)
         assertEquals(2, answer.subPackets.size)
 
-        assertEquals(10, answer.subPackets[0].number!!)
-        assertEquals(20, answer.subPackets[1].number!!)
+        assertEquals(10, answer.subPackets[0].number)
+        assertEquals(20, answer.subPackets[1].number)
     }
 
     @Test
@@ -35,9 +35,9 @@ class Day16Test {
         assertEquals(3, answer.type)
         assertEquals(3, answer.subPackets.size)
 
-        assertEquals(1, answer.subPackets[0].number!!)
-        assertEquals(2, answer.subPackets[1].number!!)
-        assertEquals(3, answer.subPackets[2].number!!)
+        assertEquals(1, answer.subPackets[0].number)
+        assertEquals(2, answer.subPackets[1].number)
+        assertEquals(3, answer.subPackets[2].number)
     }
 
     @Test
