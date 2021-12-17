@@ -12,7 +12,7 @@ fun main() {
 class Day17 : Solver {
 
     override fun part1(input: List<String>): Long {
-        val (targetXRange, targetYRange) = parseTarget(input.first())
+        val target = parseTarget(input.first())
 
 //        println("x=$targetXRange, y=$targetYRange")
 
@@ -20,8 +20,8 @@ class Day17 : Solver {
 
         // we want to find highest, so always increasing y
         for (yVel in 1..5000) {
-            for (xVel in 1..targetXRange.last) {
-                val (foundTarget, maxY) = plotLaunch(xVel, yVel, targetXRange.first, targetXRange.last, targetYRange.first, targetYRange.last)
+            for (xVel in 1..target.xRange.last) {
+                val (foundTarget, maxY) = plotLaunch(xVel, yVel, target)
                 if (foundTarget) {
                     totalMaxY = max(totalMaxY, maxY)
                 }
@@ -35,14 +35,7 @@ class Day17 : Solver {
         return 0L
     }
 
-    fun parseTarget(input: String): Pair<IntRange, IntRange> {
-        val (xPart, yPart) = input.substringAfter("target area:").split(",")
-        val (xMin, xMax) = xPart.substringAfter(" x=").split("..").map { it.toInt() }
-        val (yMin, yMax) = yPart.substringAfter(" y=").split("..").map { it.toInt() }
-        return Pair(xMin..xMax, yMin..yMax)
-    }
-
-    fun plotLaunch(xVelStart: Int, yVelStart: Int, targetXMin: Int, targetXMax: Int, targetYMin: Int, targetYMax: Int): Pair<Boolean, Int> {
+    fun plotLaunch(xVelStart: Int, yVelStart: Int, target: Target): Pair<Boolean, Int> {
         var x = 0
         var y = 0
         var xVel = xVelStart
@@ -50,7 +43,7 @@ class Day17 : Solver {
         var yMax = y
 
         do {
-            if (isWithinTarget(x, y, targetXMin, targetXMax, targetYMin, targetYMax)) return Pair(true, yMax)
+            if (isWithinTarget(x, y, target)) return Pair(true, yMax)
 
             x += xVel
             y += yVel
@@ -59,16 +52,28 @@ class Day17 : Solver {
             xVel = if (xVel > 0) xVel - 1 else xVel + 1
             yVel -= 1
 
-        } while (!isPastTarget(x, y, targetXMin, targetXMax, targetYMin, targetYMax))
+        } while (!isPastTarget(x, y, target))
 
         return Pair(false, yMax)
     }
 
-    private fun isWithinTarget(x: Int, y: Int, targetXMin: Int, targetXMax: Int, targetYMin: Int, targetYMax: Int): Boolean {
-        return x in targetXMin..targetXMax && y in targetYMin..targetYMax
+    private fun isWithinTarget(x: Int, y: Int, target: Target): Boolean {
+        return x in target.xRange && y in target.yRange
     }
 
-    private fun isPastTarget(x: Int, y: Int, targetXMin: Int, targetXMax: Int, targetYMin: Int, targetYMax: Int): Boolean {
-        return x > targetXMax || y < targetYMin
+    private fun isPastTarget(x: Int, y: Int, target: Target): Boolean {
+        return x > target.xRange.last || y < target.yRange.first
     }
+
+    private fun parseTarget(input: String): Target {
+        val (xPart, yPart) = input.substringAfter("target area:").split(",")
+        val (xMin, xMax) = xPart.substringAfter(" x=").split("..").map { it.toInt() }
+        val (yMin, yMax) = yPart.substringAfter(" y=").split("..").map { it.toInt() }
+        return Target(xMin..xMax, yMin..yMax)
+    }
+
+    data class Target(
+        val xRange: IntRange,
+        val yRange: IntRange
+    )
 }

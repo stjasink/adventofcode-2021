@@ -5,21 +5,21 @@ class Day17Test {
 
     @Test
     fun part1TestPlot1() {
-        assertTrue(Day17().plotLaunch(7, 2, 20, 30, -10, -5).first)
+        assertTrue(Day17().plotLaunch(7, 2, Day17.Target(20..30, -10..-5)).first)
     }
 
     @Test
     fun part1TestPlot2() {
-        assertTrue(Day17().plotLaunch(6, 3, 20, 30, -10, -5).first)
+        assertTrue(Day17().plotLaunch(6, 3, Day17.Target(20..30, -10..-5)).first)
     }
     @Test
     fun part1TestPlot3() {
-        assertTrue(Day17().plotLaunch(9, 0, 20, 30, -10, -5).first)
+        assertTrue(Day17().plotLaunch(9, 0, Day17.Target(20..30, -10..-5)).first)
     }
 
     @Test
     fun part1TestPlot4() {
-        assertFalse(Day17().plotLaunch(17, -4, 20, 30, -10, -5).first)
+        assertFalse(Day17().plotLaunch(17, -4, Day17.Target(20..30, -10..-5)).first)
     }
 
     @Test
