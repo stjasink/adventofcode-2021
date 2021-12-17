@@ -14,13 +14,9 @@ class Day17 : Solver {
     override fun part1(input: List<String>): Long {
         val target = parseTarget(input.first())
 
-//        println("x=$targetXRange, y=$targetYRange")
-
-        var totalMaxY = 0
-
-        // we want to find highest, so always increasing y
-        for (yVel in 1..5000) {
-            for (xVel in 1..target.xRange.last) {
+       var totalMaxY = 0
+        for (yVel in -1000..1000) {
+            for (xVel in -1000..1000) {
                 val (foundTarget, maxY) = plotLaunch(xVel, yVel, target)
                 if (foundTarget) {
                     totalMaxY = max(totalMaxY, maxY)
@@ -32,7 +28,19 @@ class Day17 : Solver {
     }
 
     override fun part2(input: List<String>): Long {
-        return 0L
+        val target = parseTarget(input.first())
+
+        val landed = mutableSetOf<Pair<Int, Int>>()
+        for (yVel in -1000..1000) {
+            for (xVel in -1000..1000) {
+                val (foundTarget, _) = plotLaunch(xVel, yVel, target)
+                if (foundTarget) {
+                    landed.add(Pair(xVel, yVel))
+                }
+            }
+        }
+
+        return landed.size.toLong()
     }
 
     fun plotLaunch(xVelStart: Int, yVelStart: Int, target: Target): Pair<Boolean, Int> {
@@ -49,7 +57,7 @@ class Day17 : Solver {
             y += yVel
             yMax = max(yMax, y)
 
-            xVel = if (xVel > 0) xVel - 1 else xVel + 1
+            xVel = if (xVel > 0) xVel - 1 else if (xVel < 0) xVel + 1 else 0
             yVel -= 1
 
         } while (!isPastTarget(x, y, target))
