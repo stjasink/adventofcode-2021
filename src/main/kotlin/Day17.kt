@@ -30,7 +30,7 @@ class Day17 : Solver {
             for (xVel in 1..target.xRange.last) {
                 val (foundTarget, maxY) = plotLaunch(xVel, yVel, target)
                 if (foundTarget) {
-                    landed.put(Pair(xVel, yVel), maxY)
+                    landed[Pair(xVel, yVel)] = maxY
                 }
             }
         }
@@ -42,7 +42,7 @@ class Day17 : Solver {
         var y = 0
         var xVel = xVelStart
         var yVel = yVelStart
-        var yMax = y
+        var yMax = 0
 
         do {
             if (isWithinTarget(x, y, target)) return Pair(true, yMax)
