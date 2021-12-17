@@ -26,12 +26,10 @@ class Day17 : Solver {
 
     private fun plotAllWithMaxHeight(target: Target): Map<Pair<Int, Int>, Int> {
         val landed = mutableMapOf<Pair<Int, Int>, Int>()
-        for (yVel in target.yRange.first..target.yRange.first.absoluteValue) {
+        for (yVel in target.yRange.first .. target.yRange.first.absoluteValue-1) {
             for (xVel in 1..target.xRange.last) {
                 val (foundTarget, maxY) = plotLaunch(xVel, yVel, target)
-                if (foundTarget) {
-                    landed[Pair(xVel, yVel)] = maxY
-                }
+                if (foundTarget) landed[Pair(xVel, yVel)] = maxY
             }
         }
         return landed
