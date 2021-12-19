@@ -15,7 +15,7 @@ class Day19 : Solver {
         val orientedScanners = MutableList<Scanner?>(scanners.size) { null }
         orientedScanners[0] = scanners[0]
 
-        while (orientedScanners.filterNotNull().size < scanners.size-1) {
+        while (orientedScanners.filterNotNull().size < scanners.size) {
             println(orientedScanners.filterNotNull().size.toString() + " / " + scanners.size)
             orientedScanners.filterNotNull().forEach { scanner1 ->
                 scanners.forEach { scanner2 ->
@@ -199,7 +199,7 @@ class Day19 : Solver {
         fun orient6() = Point(x, -y, -z)
         fun orient7() = Point(-z, -y, -x)
         fun orient8() = Point(-y, x, z)
-        fun orient9() = Point(-z, x, y)
+        fun orient9() = Point(-z, x, -y)
         fun orient10() = Point(y, x, -z)
         fun orient11() = Point(z, x, y)
         fun orient12() = Point(y, -x, z)
