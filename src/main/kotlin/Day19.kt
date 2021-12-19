@@ -1,6 +1,7 @@
 import common.Solver
 import common.runAndTime
 import common.loadInput
+import kotlin.math.absoluteValue
 
 fun main() {
     val input = loadInput("day-19.txt")
@@ -16,13 +17,13 @@ class Day19 : Solver {
         orientedScanners[0] = scanners[0]
 
         while (orientedScanners.filterNotNull().size < scanners.size) {
-            println(orientedScanners.filterNotNull().size.toString() + " / " + scanners.size)
             orientedScanners.filterNotNull().forEach { scanner1 ->
                 scanners.forEach { scanner2 ->
                     if (scanner1.num != scanner2.num) {
                         val match = compareScanners(scanner1, scanner2)
                         if (match != null) {
-                            orientedScanners[match.num] = match
+                            val (matchedScanner, _) = match
+                            orientedScanners[matchedScanner.num] = matchedScanner
                         }
                     }
                 }
@@ -34,15 +35,41 @@ class Day19 : Solver {
     }
 
     override fun part2(input: List<String>): Long {
-        return 0L
+        val scanners = parseInput(input)
+        val orientedScanners = MutableList<Scanner?>(scanners.size) { null }
+        orientedScanners[0] = scanners[0]
+
+        val scannerOffsets = mutableListOf<Vector>()
+        while (orientedScanners.filterNotNull().size < scanners.size) {
+            orientedScanners.filterNotNull().forEach { scanner1 ->
+                scanners.forEach { scanner2 ->
+                    if (scanner1.num != scanner2.num) {
+                        val match = compareScanners(scanner1, scanner2)
+                        if (match != null) {
+                            val (matchedScanner, offset) = match
+                            scannerOffsets.add(offset)
+                            orientedScanners[matchedScanner.num] = matchedScanner
+                        }
+                    }
+                }
+            }
+        }
+
+        val scannerDistances = scannerOffsets.flatMap { scannerOffset1 ->
+            scannerOffsets.map { scannerOffset2 ->
+                scannerOffset1.manhattanDistanceTo(scannerOffset2)
+            }
+        }
+
+        return scannerDistances.maxOf { it }.toLong()
     }
 
-    fun compareScanners(scanner1: Scanner, scanner2: Scanner): Scanner? {
+    fun compareScanners(scanner1: Scanner, scanner2: Scanner): Pair<Scanner, Vector>? {
         for (orientation in 0..23) {
             val scanner2TestOrientation = scanner2.orient(orientation)
             val match = scanner1.beaconsOverlap(scanner2TestOrientation)
             if (match.first) {
-                return scanner2TestOrientation.offset(match.second!!)
+                return Pair(scanner2TestOrientation.offset(match.second!!), match.second!!)
             }
         }
         return null
@@ -168,14 +195,6 @@ class Day19 : Solver {
             return Scanner(num, beacons.map { it.offset(by) }.toSet())
         }
 
-        fun findOffset(): Set<Vector> {
-            return beacons.flatMap { beacon1 ->
-                beacons.filterNot { it == beacon1 }.map { beacon2 ->
-                    beacon1.distanceTo(beacon2)
-                }
-            }.toSet()
-        }
-
         fun print() {
             println("--- scanner $num ---")
             beacons.forEach {
@@ -263,5 +282,8 @@ class Day19 : Solver {
     data class Vector (
         val x: Int,
         val y: Int,
-        val z: Int)
+        val z: Int) {
+
+        fun manhattanDistanceTo(other: Vector) = (x - other.x).absoluteValue + (y - other.y).absoluteValue + (z - other.z).absoluteValue
+    }
 }
