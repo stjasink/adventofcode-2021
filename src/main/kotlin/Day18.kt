@@ -12,27 +12,26 @@ fun main() {
 class Day18 : Solver {
 
     override fun part1(input: List<String>): Long {
-        val total = addAll(input)
+        val numbers = input.map { SnailNumber.from(it) }
+        val total = numbers.drop(1).fold(numbers.first()) { acc, num ->
+            acc.add(num)
+        }
         return total.magnitude().toLong()
     }
 
 
     override fun part2(input: List<String>): Long {
-        return 0L
-    }
-
-
-    fun addAll(input: List<String>): SnailNumber {
         val numbers = input.map { SnailNumber.from(it) }
-        val total = numbers.drop(1).fold(numbers.first()) { acc, num ->
-//            println("  ${acc.toSnailString()}")
-//            println("+ ${num.toSnailString()}")
-            val sum = acc.add(num)
-//            println("= ${sum.toSnailString()}")
-//            println()
-            sum
-        }
-        return total
+        val sumMagnitudes = numbers.mapIndexed { i1, number1 ->
+            numbers.mapIndexed { i2, number2 ->
+                if (i1 == i2) {
+                    null
+                } else {
+                    number1.add(number2).magnitude()
+                }
+            }
+        }.flatten().filterNotNull()
+        return sumMagnitudes.maxOf { it }.toLong()
     }
 
 }
@@ -43,33 +42,17 @@ data class SnailNumber(
     val rightVal: Int?,
     val right: SnailNumber?,
     val depth: Int,
-    val id: Int = Random.nextInt()
+    val id: Int = Random.nextInt() // hack to prevent two numbers with the same values from being the same
 ) {
     companion object {
         fun from(input: String) = numberFromString(input, 1)
     }
 
     fun add(other: SnailNumber): SnailNumber {
-//        println(this.toSnailString())
-//        println(this.toDepthString())
-//
-//        println(other.toSnailString())
-//        println(other.toDepthString())
-//
-
         val thisOneDeeper = this.addDepth()
-//        println(thisOneDeeper.toSnailString())
-//        println(thisOneDeeper.toDepthString())
         val otherOneDeeper = other.addDepth()
-//        println(otherOneDeeper.toSnailString())
-//        println(otherOneDeeper.toDepthString())
         val addedNumber = SnailNumber(null, thisOneDeeper, null, otherOneDeeper, 1)
-//        println(addedNumber.toSnailString())
-//        println(addedNumber.toDepthString())
-        val reducedAddedNumber = addedNumber.reduce()
-//        println(reducedAddedNumber.toSnailString())
-//        println(reducedAddedNumber.toDepthString())
-        return reducedAddedNumber
+        return addedNumber.reduce()
     }
 
     fun explode(): SnailNumber {
@@ -77,7 +60,6 @@ data class SnailNumber(
         var rightRegularNumber: Pair<SnailNumber, Char>? = null
         var exploder: SnailNumber? = null
 
-        // [[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]],[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]]
         fun findExploder(number: SnailNumber) {
             if (exploder == null && (number.leftVal != null)) {
                 leftRegularNumber = Pair(number, 'L')
@@ -108,7 +90,6 @@ data class SnailNumber(
             }
         }
 
-        // [[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]],[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]]
         fun doExploding(number: SnailNumber): SnailNumber {
             val newLeftVal = if (number == leftRegularNumber?.first && leftRegularNumber?.second == 'L') {
                 number.leftVal!! + exploder!!.leftVal!!
@@ -144,11 +125,9 @@ data class SnailNumber(
     fun split(): SnailNumber {
         var splitter: SnailNumber? = null
 
-        // [[[[7,7],[7,8]],[[9,5],[8,0]]],[[[9,10],20],[8,[9,0]]]]
         fun findSplitter(number: SnailNumber) {
-            if (splitter == null) { // only bother looking if not already found
+            if (splitter == null) {
                 number.left?.let { findSplitter(it) }
-                // might have been found on left branch
                 if (splitter == null && number.leftVal != null && number.leftVal > 9) {
                     splitter = number
                 }
@@ -156,7 +135,6 @@ data class SnailNumber(
                     splitter = number
                 }
                 number.right?.let { findSplitter(it) }
-
             }
         }
 
@@ -213,14 +191,8 @@ data class SnailNumber(
 
     fun reduce(): SnailNumber {
         var previousReduction = this
-//        println(this.toSnailString())
-//        println(this.toDepthString())
-//        println()
         do {
             val thisReduction = previousReduction.explodeOrSplit()
-//            println(thisReduction.toSnailString())
-//            println(thisReduction.toDepthString())
-//            println()
             if (thisReduction == previousReduction) {
                 return thisReduction
             }
