@@ -26,7 +26,7 @@ class Day18 : Solver {
         val total = numbers.drop(1).fold(numbers.first()) { acc, num ->
             println("  ${acc.toSnailString()}")
             println("+ ${num.toSnailString()}")
-            val sum = acc.add(num).reduce()
+            val sum = acc.add(num)
             println("= ${sum.toSnailString()}")
             println()
             sum
@@ -48,9 +48,26 @@ data class SnailNumber(
     }
 
     fun add(other: SnailNumber): SnailNumber {
+//        println(this.toSnailString())
+//        println(this.toDepthString())
+//
+//        println(other.toSnailString())
+//        println(other.toDepthString())
+//
+
         val thisOneDeeper = this.addDepth()
+//        println(thisOneDeeper.toSnailString())
+//        println(thisOneDeeper.toDepthString())
         val otherOneDeeper = other.addDepth()
-        return SnailNumber(null, thisOneDeeper, null, otherOneDeeper, 1)
+//        println(otherOneDeeper.toSnailString())
+//        println(otherOneDeeper.toDepthString())
+        val addedNumber = SnailNumber(null, thisOneDeeper, null, otherOneDeeper, 1)
+//        println(addedNumber.toSnailString())
+//        println(addedNumber.toDepthString())
+        val reducedAddedNumber = addedNumber.reduce()
+//        println(reducedAddedNumber.toSnailString())
+//        println(reducedAddedNumber.toDepthString())
+        return reducedAddedNumber
     }
 
     fun explode(): SnailNumber {
@@ -121,41 +138,50 @@ data class SnailNumber(
     }
 
     fun split(): SnailNumber {
-        val newLeftVal: Int?
-        val newRightVal: Int?
-        val newLeft: SnailNumber?
-        val newRight: SnailNumber?
+        var splitter: SnailNumber? = null
 
-        if (leftVal != null) {
-            if (leftVal >= 10) {
-                val splitLeftVal = leftVal / 2
-                val splitRightVal = leftVal / 2 + (if (leftVal % 2 == 1) 1 else 0)
-                newLeftVal = null
-                newLeft = SnailNumber(splitLeftVal, null, splitRightVal, null, depth+1)
-            } else {
-                newLeftVal = leftVal
-                newLeft = null
+        fun findSplitter(number: SnailNumber) {
+            if (splitter == null) { // only bother looking if not already found
+                if ((number.leftVal != null && number.leftVal > 9) || (number.rightVal != null && number.rightVal > 9)) {
+                    splitter = number
+                } else {
+                    number.left?.let { findSplitter(it) }
+                    number.right?.let { findSplitter(it) }
+                }
             }
+        }
+
+        var doneSplit = false
+        fun doSplitting(number: SnailNumber): SnailNumber {
+            if (number == splitter) {
+                // always try left first
+                if (number.leftVal != null && number.leftVal > 9) {
+                    val splitLeftVal = number.leftVal / 2
+                    val splitRightVal = number.leftVal / 2 + (if (number.leftVal % 2 == 1) 1 else 0)
+                    val newLeft = SnailNumber(splitLeftVal, null, splitRightVal, null, number.depth+1)
+                    doneSplit = true
+                    return SnailNumber(null, newLeft, number.rightVal, number.right, number.depth)
+                } else  {
+                    if (!(number.rightVal != null && number.rightVal > 9)) throw IllegalStateException("Expected rightVal to be splittable")
+                    val splitLeftVal = number.rightVal / 2
+                    val splitRightVal = number.rightVal / 2 + (if (number.rightVal % 2 == 1) 1 else 0)
+                    val newRight = SnailNumber(splitLeftVal, null, splitRightVal, null, number.depth+1)
+                    doneSplit = true
+                    return SnailNumber(number.leftVal, number.left, null, newRight, number.depth)
+                }
+            } else {
+                val newLeft = if (doneSplit) number.left else number.left?.let { doSplitting(it) }
+                val newRight = if (doneSplit) number.right else number.right?.let { doSplitting(it) }
+                return SnailNumber(number.leftVal, newLeft, number.rightVal, newRight, number.depth)
+            }
+        }
+
+        findSplitter(this)
+        return if (splitter != null) {
+            doSplitting(this)
         } else {
-            newLeftVal = null
-            newLeft = left!!.split()
+            this
         }
-        if (rightVal != null) {
-            if (rightVal >= 10) {
-                val splitLeftVal = rightVal / 2
-                val splitRightVal = rightVal / 2 + (if (rightVal % 2 == 1) 1 else 0)
-                newRightVal = null
-                newRight = SnailNumber(splitLeftVal, null, splitRightVal, null, depth+1)
-            } else {
-                newRightVal = rightVal
-                newRight = null
-            }
-        }  else {
-            newRightVal = null
-            newRight = right!!.split()
-        }
-
-        return SnailNumber(newLeftVal, newLeft, newRightVal, newRight, depth)
     }
 
     private fun addDepth(): SnailNumber {
@@ -178,12 +204,14 @@ data class SnailNumber(
 
     fun reduce(): SnailNumber {
         var previousReduction = this
-//        println(this.toSnailString())
-//        println(this.toDepthString())
+        println(this.toSnailString())
+        println(this.toDepthString())
+        println()
         do {
             val thisReduction = previousReduction.explodeOrSplit()
-//            println(thisReduction.toSnailString())
-//            println(thisReduction.toDepthString())
+            println(thisReduction.toSnailString())
+            println(thisReduction.toDepthString())
+            println()
             if (thisReduction == previousReduction) {
                 return thisReduction
             }
@@ -198,9 +226,13 @@ data class SnailNumber(
     }
 
     fun toDepthString(): String {
-        val leftString = left?.toDepthString().orEmpty()
-        val rightString = right?.toDepthString().orEmpty()
-        return "[$leftString $depth $rightString]"
+        val output = StringBuilder()
+        output.append("[")
+        if (left != null) output.append(left.toDepthString()) else if (leftVal!! > 9) output.append("  ") else output.append(" ")
+        output.append(depth)
+        if (right != null) output.append(right.toDepthString()) else if (rightVal!! > 9) output.append("  ") else output.append(" ")
+        output.append("]")
+        return output.toString()
     }
 }
 
