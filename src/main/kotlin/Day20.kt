@@ -84,15 +84,11 @@ class Day20 : Solver {
 
         private fun mappingCodeForPixel(at: Pixel): Int {
             val binaryString = StringBuilder()
-            binaryString.append(if (isLit(Pixel(at.x-1,at.y-1))) '1' else '0')
-            binaryString.append(if (isLit(Pixel(at.x,at.y-1))) '1' else '0')
-            binaryString.append(if (isLit(Pixel(at.x+1,at.y-1))) '1' else '0')
-            binaryString.append(if (isLit(Pixel(at.x-1,at.y))) '1' else '0')
-            binaryString.append(if (isLit(Pixel(at.x,at.y))) '1' else '0')
-            binaryString.append(if (isLit(Pixel(at.x+1,at.y))) '1' else '0')
-            binaryString.append(if (isLit(Pixel(at.x-1,at.y+1))) '1' else '0')
-            binaryString.append(if (isLit(Pixel(at.x,at.y+1))) '1' else '0')
-            binaryString.append(if (isLit(Pixel(at.x+1,at.y+1))) '1' else '0')
+            for (yInc in -1 .. 1) {
+                for (xInc in -1 .. 1) {
+                    binaryString.append(if (isLit(Pixel(at.x + xInc,at.y + yInc))) '1' else '0')
+                }
+            }
             return binaryString.toString().toInt(2)
         }
         
