@@ -37,13 +37,12 @@ data class SnailNumber(
         var rightRegularNumber: Pair<SnailNumber, Char>? = null
         var exploder: SnailNumber? = null
 
-        //  "[[6,[5,[4,[3,2]]]],1]"
         fun findExploder(number: SnailNumber) {
             if (exploder == null && (number.leftVal != null)) {
                 leftRegularNumber = Pair(number, 'L')
             }
 
-            if (number.depth == 4) {
+            if (number.depth == 4 && exploder == null) { // only find one exploder per turn
                 if (number.left != null) {
                     exploder = number.left
                 } else if (number.right != null) {
@@ -68,7 +67,6 @@ data class SnailNumber(
             }
         }
 
-        //  "[[6,[5,[4,[3,2]]]],1]"
         fun doExploding(number: SnailNumber): SnailNumber {
             val newLeftVal = if (number == leftRegularNumber?.first && leftRegularNumber?.second == 'L') {
                 number.leftVal!! + exploder!!.leftVal!!
@@ -90,7 +88,7 @@ data class SnailNumber(
 
             val newRight = if (number.right == exploder) null else number.right?.let { doExploding(it) }
 
-            return SnailNumber(newLeftVal, newLeft, newRightVal, newRight, depth)
+            return SnailNumber(newLeftVal, newLeft, newRightVal, newRight, number.depth)
         }
 
         findExploder(this)
@@ -101,7 +99,7 @@ data class SnailNumber(
         }
     }
 
-    fun reduce(): SnailNumber {
+    fun split(): SnailNumber {
         val newLeftVal: Int?
         val newRightVal: Int?
         val newLeft: SnailNumber?
@@ -119,7 +117,7 @@ data class SnailNumber(
             }
         } else {
             newLeftVal = null
-            newLeft = left!!.reduce()
+            newLeft = left!!.split()
         }
         if (rightVal != null) {
             if (rightVal >= 10) {
@@ -133,94 +131,47 @@ data class SnailNumber(
             }
         }  else {
             newRightVal = null
-            newRight = right!!.reduce()
+            newRight = right!!.split()
         }
-
-
 
         return SnailNumber(newLeftVal, newLeft, newRightVal, newRight, depth)
     }
 
+    private fun explodeOrSplit(): SnailNumber {
+        val exploded = explode()
+        if (exploded != this) {
+            return exploded
+        }
+        return split()
+    }
 
+    fun reduce(): SnailNumber {
+        var previousReduction = this
+        println(this.toSnailString())
+//        println(this.toDepthString())
+        do {
+            val thisReduction = previousReduction.explodeOrSplit()
+            println(thisReduction.toSnailString())
+//            println(thisReduction.toDepthString())
+            if (thisReduction == previousReduction) {
+                return thisReduction
+            }
+            previousReduction = thisReduction
+        } while (true)
+    }
 
     fun toSnailString(): String {
         val leftString = leftVal ?: left!!.toSnailString()
         val rightString = rightVal ?: right!!.toSnailString()
         return "[$leftString,$rightString]"
     }
+
+    fun toDepthString(): String {
+        val leftString = left?.toDepthString().orEmpty()
+        val rightString = right?.toDepthString().orEmpty()
+        return "[$leftString $depth $rightString]"
+    }
 }
-
-
-
-//
-//fun doExplode(input: String): String {
-//    val leftBracketPattern = Regex("\\[\\[\\[\\[(\\d),(\\d)]")
-//    val numberPattern = Regex("(\\d+)")
-//    val leftNumberPattern = Regex("\\[(\\d+)")
-//
-//    val newStringToLeft: String
-//    val newStringToRight: String
-//
-//    if (leftBracketPattern.find(input) != null) {
-//        println("matched left")
-//        val match = leftBracketPattern.find(input)!!
-//        val stringToLeft = input.substring(0, match.range.first)
-//        val stringToRight = input.substring(match.range.last+1)
-//        val leftNumberMatches = leftNumberPattern.findAll(stringToLeft).toList()
-//        val rightNumberMatch = numberPattern.find(stringToRight)
-//
-//        newStringToLeft = if (leftNumberMatches.isNotEmpty()) {
-//            val leftNumberMatch = leftNumberMatches.last()
-//            val newValue = match.groupValues[1].toInt() + leftNumberMatch.groupValues[1].toInt()
-//            stringToLeft.replaceRange(leftNumberMatch.range, newValue.toString())
-//        } else stringToLeft
-//
-//        newStringToRight = if (rightNumberMatch != null) {
-//            val newValue = match.groupValues[2].toInt() + rightNumberMatch.groupValues[1].toInt()
-//            stringToRight.replaceRange(rightNumberMatch.range, newValue.toString())
-//        } else stringToRight
-//
-//        return newStringToLeft + "[[[0" + newStringToRight
-//    }
-//
-//    return ""
-//}
-//
-//fun doExplode2(input: String): String {
-//
-//    val leftBracketPattern = Regex("\\[\\[\\[\\[(\\d),(\\d)]")
-//    val numberPattern = Regex("(\\d+)")
-//    val leftNumberPattern = Regex("\\[(\\d+)")
-//
-//    val newStringToLeft: String
-//    val newStringToRight: String
-//
-//    if (input.contains("[[[[") && input.indexOf("[[[[") > 0) {
-//        val matchStart = input.indexOf("[[[[")
-//        val stringToLeft = input.substring(0, matchStart+1)
-//        val stringToRight = input.substring(matchStart+9)
-//        val leftNumberMatches = leftNumberPattern.findAll(stringToLeft).toList()
-//        val rightNumberMatch = numberPattern.find(stringToRight)
-//
-//        newStringToLeft = if (leftNumberMatches.isNotEmpty()) {
-//            val leftNumberMatch = leftNumberMatches.last()
-//            val oldValue = input[matchStart+5].digitToInt()
-//            val newValue = oldValue + leftNumberMatch.groupValues[1].toInt()
-//            stringToLeft.replaceRange(leftNumberMatch.range, newValue.toString())
-//        } else stringToLeft
-//
-//        newStringToRight = if (rightNumberMatch != null) {
-//            val oldValue = input[matchStart+7].digitToInt()
-//            val newValue = oldValue + rightNumberMatch.groupValues[1].toInt()
-//            stringToRight.replaceRange(rightNumberMatch.range, newValue.toString())
-//        } else stringToRight
-//
-//        return newStringToLeft + "[[[0" + newStringToRight
-//    }
-//
-//    return ""
-//}
-
 
 fun numberFromString(input: String, depth: Int): SnailNumber {
 

@@ -62,14 +62,14 @@ class Day18Test {
     fun part1TestSplit1() {
         val input = "[[[[0,7],4],[15,[0,13]]],[1,1]]"
         val output = "[[[[0,7],4],[[7,8],[0,[6,7]]]],[1,1]]"
-        assertEquals(output, SnailNumber.from(input).reduce().toSnailString())
+        assertEquals(output, SnailNumber.from(input).split().toSnailString())
     }
 
     @Test
     fun part1TestSplit2() {
         val input = "[[[[0,7],4],[[7,8],[0,13]]],[1,1]]"
         val output = "[[[[0,7],4],[[7,8],[0,[6,7]]]],[1,1]]"
-        assertEquals(output, SnailNumber.from(input).reduce().toSnailString())
+        assertEquals(output, SnailNumber.from(input).split().toSnailString())
     }
 
     @Test
@@ -107,13 +107,40 @@ class Day18Test {
         assertEquals(output, SnailNumber.from(input).explode().toSnailString())
     }
 
+    @Test
+    fun part1TestExplode6() {
+        val input = "[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]"
+        val output = "[[[[0,7],4],[7,[[8,4],9]]],[1,1]]"
+        assertEquals(output, SnailNumber.from(input).explode().toSnailString())
+    }
 
+    @Test
+    fun part1TestExplode7() {
+        val input = "[[[[0,7],4],[7,[[8,4],9]]],[1,1]]"
+        val output = "[[[[0,7],4],[15,[0,13]]],[1,1]]"
+        assertEquals(output, SnailNumber.from(input).explode().toSnailString())
+    }
+//
 //    @Test
 //    fun part1TestReduce1() {
-//        val input = "[[[[[9,8],1],2],3],4]"
-//        val output = "[[[[0,9],2],3],4]"
-//        assertEquals(SnailNumber.from(input).reduce().toSnailString(), output)
+//        val input = "[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]"
+//        val output = "[[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]]"
+//        assertEquals(output, SnailNumber.from(input).reduce().toSnailString())
 //    }
+//
+//    @Test
+//    fun part1TestReduce2() {
+//        val input = "[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]"
+//        val output = "[[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]]"
+//        assertEquals(output, SnailNumber.from(input).reduce().toSnailString())
+//    }
+
+    @Test
+    fun part1TestReduce3() {
+        val input = "[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]"
+        val output = "[[[[0,7],4],[[7,8],[6,0]]],[8,1]]"
+        assertEquals(output, SnailNumber.from(input).reduce().toSnailString())
+    }
 
     @Test
     fun part2Test() {
