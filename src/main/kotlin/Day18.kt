@@ -37,7 +37,7 @@ data class SnailNumber(
         var rightRegularNumber: Pair<SnailNumber, Char>? = null
         var exploder: SnailNumber? = null
 
-        // "[[6,[5,[4,[3,2]]]],1]"
+        //  "[[6,[5,[4,[3,2]]]],1]"
         fun findExploder(number: SnailNumber) {
             if (exploder == null && (number.leftVal != null)) {
                 leftRegularNumber = Pair(number, 'L')
@@ -51,24 +51,24 @@ data class SnailNumber(
                 }
             }
 
-            number.left?.let { findExploder(it) }
+            number.left?.let { if (it != exploder) findExploder(it) }
 
             if (exploder == null && (number.rightVal != null)) {
                 leftRegularNumber = Pair(number, 'R')
             }
 
-            if (exploder != null && number != exploder && number.depth != 4 && rightRegularNumber == null && number.leftVal != null) {
+            if (exploder != null && number.right != exploder && rightRegularNumber == null && number.leftVal != null) {
                 rightRegularNumber = Pair(number, 'L')
             }
 
-            number.right?.let { findExploder(it) }
+            number.right?.let { if (it != exploder) findExploder(it) }
 
-            if (exploder != null && number != exploder && number.depth != 4 && rightRegularNumber == null && number.rightVal != null) {
+            if (exploder != null && number != exploder && rightRegularNumber == null && number.rightVal != null) {
                 rightRegularNumber = Pair(number, 'R')
             }
         }
 
-        // "[[6,[5,[4,[3,2]]]],1]"
+        //  "[[6,[5,[4,[3,2]]]],1]"
         fun doExploding(number: SnailNumber): SnailNumber {
             val newLeftVal = if (number == leftRegularNumber?.first && leftRegularNumber?.second == 'L') {
                 number.leftVal!! + exploder!!.leftVal!!
