@@ -33,14 +33,16 @@ data class SnailNumber(
     }
 
     fun explode(): SnailNumber {
-        var leftRegularNumber: SnailNumber? = null
-        var rightRegularNumber: SnailNumber? = null
+        var leftRegularNumber: Pair<SnailNumber, Char>? = null
+        var rightRegularNumber: Pair<SnailNumber, Char>? = null
         var exploder: SnailNumber? = null
 
+        // "[[6,[5,[4,[3,2]]]],1]"
         fun findExploder(number: SnailNumber) {
             if (exploder == null && (number.leftVal != null)) {
-                leftRegularNumber = number
+                leftRegularNumber = Pair(number, 'L')
             }
+
             if (number.depth == 4) {
                 if (number.left != null) {
                     exploder = number.left
@@ -48,39 +50,43 @@ data class SnailNumber(
                     exploder = number.right
                 }
             }
-            if (exploder != null && number != exploder && (number.leftVal != null || number.rightVal != null)) {
-                rightRegularNumber = number
-            }
+
             number.left?.let { findExploder(it) }
+
+            if (exploder == null && (number.rightVal != null)) {
+                leftRegularNumber = Pair(number, 'R')
+            }
+
+            if (exploder != null && number != exploder && number.depth != 4 && rightRegularNumber == null && number.leftVal != null) {
+                rightRegularNumber = Pair(number, 'L')
+            }
+
             number.right?.let { findExploder(it) }
+
+            if (exploder != null && number != exploder && number.depth != 4 && rightRegularNumber == null && number.rightVal != null) {
+                rightRegularNumber = Pair(number, 'R')
+            }
         }
 
+        // "[[6,[5,[4,[3,2]]]],1]"
         fun doExploding(number: SnailNumber): SnailNumber {
-            val newLeftVal = if (number == leftRegularNumber) {
-                if (number.rightVal != null) {
-                    number.rightVal + exploder!!.leftVal!!
-                } else if (number.leftVal != null) {
-                    number.leftVal + exploder!!.leftVal!!
-                } else {
-                    throw IllegalStateException("Expected leftVal or rightVal to be not null")
-                }
+            val newLeftVal = if (number == leftRegularNumber?.first && leftRegularNumber?.second == 'L') {
+                number.leftVal!! + exploder!!.leftVal!!
+            } else if (number == rightRegularNumber?.first && rightRegularNumber?.second == 'L') {
+                number.leftVal!! + exploder!!.rightVal!!
             } else if (number.left == exploder) {
                 0
             } else number.leftVal
 
-            val newRightVal = if (number == rightRegularNumber) {
-                if (number.leftVal != null) {
-                    number.leftVal + exploder!!.rightVal!!
-                } else if (number.rightVal != null) {
-                    number.rightVal + exploder!!.rightVal!!
-                } else {
-                    throw IllegalStateException("Expected leftVal or rightVal to be not null")
-                }
+            val newLeft = if (number.left == exploder) null else number.left?.let { doExploding(it) }
+
+            val newRightVal = if (number == leftRegularNumber?.first && leftRegularNumber?.second == 'R') {
+                number.rightVal!! + exploder!!.leftVal!!
+            } else if (number == rightRegularNumber?.first && rightRegularNumber?.second == 'R') {
+                number.rightVal!! + exploder!!.rightVal!!
             } else if (number.right == exploder) {
                 0
             } else number.rightVal
-
-            val newLeft = if (number.left == exploder) null else number.left?.let { doExploding(it) }
 
             val newRight = if (number.right == exploder) null else number.right?.let { doExploding(it) }
 

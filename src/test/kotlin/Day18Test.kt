@@ -86,6 +86,12 @@ class Day18Test {
         assertEquals(output, SnailNumber.from(input).explode().toSnailString())
     }
 
+    @Test
+    fun part1TestExplode3() {
+        val input = "[[6,[5,[4,[3,2]]]],1]"
+        val output = "[[6,[5,[7,0]]],3]"
+        assertEquals(output, SnailNumber.from(input).explode().toSnailString())
+    }
 
     @Test
     fun part1TestExplode5() {
