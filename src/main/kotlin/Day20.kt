@@ -21,17 +21,22 @@ class Day20 : Solver {
     }
 
     override fun part2(input: List<String>): Long {
-        return 0L
+        val mapping = input.first()
+        val photo = Photo.from(input.drop(2))
+
+        val veryEnhancedPhoto = (1..50).fold(photo) { acc, _ -> acc.enhance(mapping) }
+
+        return veryEnhancedPhoto.litPixels.size.toLong()
     }
 
     data class Photo (
         val litPixels: Set<Pixel>,
         val outOfRangePixelsLit: Boolean = false
     ) {
-        val minLitX = litPixels.minOf { it.x }
-        val minLitY = litPixels.minOf { it.y }
-        val maxLitX = litPixels.maxOf { it.x }
-        val maxLitY = litPixels.maxOf { it.y }
+        private val minLitX = litPixels.minOf { it.x }
+        private val minLitY = litPixels.minOf { it.y }
+        private val maxLitX = litPixels.maxOf { it.x }
+        private val maxLitY = litPixels.maxOf { it.y }
         
         companion object {
             fun from(input: List<String>): Photo {
@@ -78,7 +83,7 @@ class Day20 : Solver {
             println()
         }
 
-        fun codeForPixel(at: Pixel): Int {
+        private fun codeForPixel(at: Pixel): Int {
             val binaryString = StringBuilder()
             binaryString.append(if (isLit(Pixel(at.x-1,at.y-1))) '1' else '0')
             binaryString.append(if (isLit(Pixel(at.x,at.y-1))) '1' else '0')
@@ -92,22 +97,13 @@ class Day20 : Solver {
             return binaryString.toString().toInt(2)
         }
         
-        fun isLit(at: Pixel): Boolean {
+        private fun isLit(at: Pixel): Boolean {
             if (at.x < minLitX || at.y < minLitY || at.x > maxLitX || at.y > maxLitY) {
                 return outOfRangePixelsLit
             } else {
                 return litPixels.contains(at)
             }
         }
-//
-//        fun findMinAndMaxLit(): List<Int> {
-//            val minX = litPixels.minOf { it.x }
-//            val minY = litPixels.minOf { it.y }
-//            val maxX = litPixels.maxOf { it.x }
-//            val maxY = litPixels.maxOf { it.y }
-//            return listOf(minX, minY, maxX, maxY)
-//        }
-
     }
 
     data class Pixel(
