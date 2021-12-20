@@ -64,7 +64,7 @@ class Day18Test {
         assertEquals("[[[[5,0],[7,4]],[5,5]],[6,6]]", answer.toSnailString())
     }
 
-//    @Test
+    @Test
     fun part1Test4() {
         val input = """
             [[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]
@@ -88,6 +88,14 @@ class Day18Test {
         val num1 = "[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]"
         val num2 = "[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]"
         val expected = "[[[[4,0],[5,4]],[[7,7],[6,0]]],[[8,[7,7]],[[7,9],[5,0]]]]"
+        assertEquals(expected, SnailNumber.from(num1).add(SnailNumber.from(num2)).toSnailString())
+    }
+
+    @Test
+    fun part1TestAdd2() {
+        val num1 = "[[[[7,0],[7,7]],[[7,7],[7,8]]],[[[7,7],[8,8]],[[7,7],[8,7]]]]"
+        val num2 = "[7,[5,[[3,8],[1,4]]]]"
+        val expected = "[[[[7,7],[7,8]],[[9,5],[8,7]]],[[[6,8],[0,8]],[[9,9],[9,0]]]]"
         assertEquals(expected, SnailNumber.from(num1).add(SnailNumber.from(num2)).toSnailString())
     }
 
@@ -145,6 +153,13 @@ class Day18Test {
     fun part1TestSplit3() {
         val input = "[[[[4,0],[5,0]],[[2,0],[15,5]]],[10,[[11,9],[11,0]]]]"
         val output = "[[[[4,0],[5,0]],[[2,0],[[7,8],5]]],[10,[[11,9],[11,0]]]]"
+        assertEquals(output, SnailNumber.from(input).split().toSnailString())
+    }
+
+    @Test
+    fun part1TestSplit4() {
+        val input = "[[[[7,7],[7,8]],[[9,5],[8,0]]],[[[9,10],20],[8,[9,0]]]]"
+        val output = "[[[[7,7],[7,8]],[[9,5],[8,0]]],[[[9,[5,5]],20],[8,[9,0]]]]"
         assertEquals(output, SnailNumber.from(input).split().toSnailString())
     }
 

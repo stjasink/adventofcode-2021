@@ -1,6 +1,7 @@
 import common.Solver
 import common.runAndTime
 import common.loadInput
+import kotlin.random.Random
 
 fun main() {
     val input = loadInput("day-18.txt")
@@ -24,11 +25,11 @@ class Day18 : Solver {
     fun addAll(input: List<String>): SnailNumber {
         val numbers = input.map { SnailNumber.from(it) }
         val total = numbers.drop(1).fold(numbers.first()) { acc, num ->
-            println("  ${acc.toSnailString()}")
-            println("+ ${num.toSnailString()}")
+//            println("  ${acc.toSnailString()}")
+//            println("+ ${num.toSnailString()}")
             val sum = acc.add(num)
-            println("= ${sum.toSnailString()}")
-            println()
+//            println("= ${sum.toSnailString()}")
+//            println()
             sum
         }
         return total
@@ -41,7 +42,8 @@ data class SnailNumber(
     val left: SnailNumber?,
     val rightVal: Int?,
     val right: SnailNumber?,
-    val depth: Int
+    val depth: Int,
+    val id: Int = Random.nextInt()
 ) {
     companion object {
         fun from(input: String) = numberFromString(input, 1)
@@ -75,6 +77,7 @@ data class SnailNumber(
         var rightRegularNumber: Pair<SnailNumber, Char>? = null
         var exploder: SnailNumber? = null
 
+        // [[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]],[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]]
         fun findExploder(number: SnailNumber) {
             if (exploder == null && (number.leftVal != null)) {
                 leftRegularNumber = Pair(number, 'L')
@@ -105,6 +108,7 @@ data class SnailNumber(
             }
         }
 
+        // [[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]],[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]]
         fun doExploding(number: SnailNumber): SnailNumber {
             val newLeftVal = if (number == leftRegularNumber?.first && leftRegularNumber?.second == 'L') {
                 number.leftVal!! + exploder!!.leftVal!!
@@ -140,14 +144,19 @@ data class SnailNumber(
     fun split(): SnailNumber {
         var splitter: SnailNumber? = null
 
+        // [[[[7,7],[7,8]],[[9,5],[8,0]]],[[[9,10],20],[8,[9,0]]]]
         fun findSplitter(number: SnailNumber) {
             if (splitter == null) { // only bother looking if not already found
-                if ((number.leftVal != null && number.leftVal > 9) || (number.rightVal != null && number.rightVal > 9)) {
+                number.left?.let { findSplitter(it) }
+                // might have been found on left branch
+                if (splitter == null && number.leftVal != null && number.leftVal > 9) {
                     splitter = number
-                } else {
-                    number.left?.let { findSplitter(it) }
-                    number.right?.let { findSplitter(it) }
                 }
+                if (splitter == null && number.rightVal != null && number.rightVal > 9) {
+                    splitter = number
+                }
+                number.right?.let { findSplitter(it) }
+
             }
         }
 
@@ -204,14 +213,14 @@ data class SnailNumber(
 
     fun reduce(): SnailNumber {
         var previousReduction = this
-        println(this.toSnailString())
-        println(this.toDepthString())
-        println()
+//        println(this.toSnailString())
+//        println(this.toDepthString())
+//        println()
         do {
             val thisReduction = previousReduction.explodeOrSplit()
-            println(thisReduction.toSnailString())
-            println(thisReduction.toDepthString())
-            println()
+//            println(thisReduction.toSnailString())
+//            println(thisReduction.toDepthString())
+//            println()
             if (thisReduction == previousReduction) {
                 return thisReduction
             }
