@@ -11,13 +11,28 @@ fun main() {
 class Day18 : Solver {
 
     override fun part1(input: List<String>): Long {
-        return 0L
+        val total = addAll(input)
+        return total.magnitude().toLong()
     }
+
 
     override fun part2(input: List<String>): Long {
         return 0L
     }
 
+
+    fun addAll(input: List<String>): SnailNumber {
+        val numbers = input.map { SnailNumber.from(it) }
+        val total = numbers.drop(1).fold(numbers.first()) { acc, num ->
+            println("  ${acc.toSnailString()}")
+            println("+ ${num.toSnailString()}")
+            val sum = acc.add(num).reduce()
+            println("= ${sum.toSnailString()}")
+            println()
+            sum
+        }
+        return total
+    }
 
 }
 
@@ -30,6 +45,12 @@ data class SnailNumber(
 ) {
     companion object {
         fun from(input: String) = numberFromString(input, 1)
+    }
+
+    fun add(other: SnailNumber): SnailNumber {
+        val thisOneDeeper = this.addDepth()
+        val otherOneDeeper = other.addDepth()
+        return SnailNumber(null, thisOneDeeper, null, otherOneDeeper, 1)
     }
 
     fun explode(): SnailNumber {
@@ -137,6 +158,16 @@ data class SnailNumber(
         return SnailNumber(newLeftVal, newLeft, newRightVal, newRight, depth)
     }
 
+    private fun addDepth(): SnailNumber {
+        return SnailNumber(leftVal, left?.addDepth(), rightVal, right?.addDepth(), depth + 1)
+    }
+
+    fun magnitude(): Int {
+        val leftMag = leftVal ?: left!!.magnitude()
+        val rightMag = rightVal ?: right!!.magnitude()
+        return leftMag * 3 + rightMag * 2
+    }
+
     private fun explodeOrSplit(): SnailNumber {
         val exploded = explode()
         if (exploded != this) {
@@ -147,11 +178,11 @@ data class SnailNumber(
 
     fun reduce(): SnailNumber {
         var previousReduction = this
-        println(this.toSnailString())
+//        println(this.toSnailString())
 //        println(this.toDepthString())
         do {
             val thisReduction = previousReduction.explodeOrSplit()
-            println(thisReduction.toSnailString())
+//            println(thisReduction.toSnailString())
 //            println(thisReduction.toDepthString())
             if (thisReduction == previousReduction) {
                 return thisReduction

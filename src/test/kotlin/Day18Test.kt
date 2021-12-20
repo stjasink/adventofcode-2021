@@ -23,6 +23,75 @@ class Day18Test {
     }
 
     @Test
+    fun part1Test1() {
+        val input = """
+            [1,1]
+            [2,2]
+            [3,3]
+            [4,4]
+        """.trimIndent().split('\n')
+
+        val answer = Day18().addAll(input)
+        assertEquals("[[[[1,1],[2,2]],[3,3]],[4,4]]", answer.toSnailString())
+    }
+
+    @Test
+    fun part1Test2() {
+        val input = """
+            [1,1]
+            [2,2]
+            [3,3]
+            [4,4]
+            [5,5]
+        """.trimIndent().split('\n')
+
+        val answer = Day18().addAll(input)
+        assertEquals("[[[[3,0],[5,3]],[4,4]],[5,5]]", answer.toSnailString())
+    }
+
+    @Test
+    fun part1Test3() {
+        val input = """
+            [1,1]
+            [2,2]
+            [3,3]
+            [4,4]
+            [5,5]
+            [6,6]
+        """.trimIndent().split('\n')
+
+        val answer = Day18().addAll(input)
+        assertEquals("[[[[5,0],[7,4]],[5,5]],[6,6]]", answer.toSnailString())
+    }
+
+    @Test
+    fun part1Test4() {
+        val input = """
+            [[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]
+            [7,[[[3,7],[4,3]],[[6,3],[8,8]]]]
+            [[2,[[0,8],[3,4]]],[[[6,7],1],[7,[1,6]]]]
+            [[[[2,4],7],[6,[0,5]]],[[[6,8],[2,8]],[[2,1],[4,5]]]]
+            [7,[5,[[3,8],[1,4]]]]
+            [[2,[2,2]],[8,[8,1]]]
+            [2,9]
+            [1,[[[9,3],9],[[9,0],[0,7]]]]
+            [[[5,[7,4]],7],1]
+            [[[[4,2],2],6],[8,7]]
+        """.trimIndent().split('\n')
+
+        val answer = Day18().addAll(input)
+        assertEquals("[[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]", answer.toSnailString())
+    }
+
+    @Test
+    fun part1TestAdd1() {
+        val num1 = "[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]"
+        val num2 = "[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]"
+        val expected = "[[[[4,0],[5,4]],[[7,7],[6,0]]],[[8,[7,7]],[[7,9],[5,0]]]]"
+        assertEquals(expected, SnailNumber.from(num1).add(SnailNumber.from(num2)).toSnailString())
+    }
+
+    @Test
     fun part1TestParse1() {
         val answer = SnailNumber.from("[1,1]")
         assertEquals(SnailNumber(1, null, 1, null, 1), answer)
@@ -140,6 +209,42 @@ class Day18Test {
         val input = "[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]"
         val output = "[[[[0,7],4],[[7,8],[6,0]]],[8,1]]"
         assertEquals(output, SnailNumber.from(input).reduce().toSnailString())
+    }
+
+    @Test
+    fun part1TestMagnitude1() {
+        val input = "[[1,2],[[3,4],5]]"
+        assertEquals(143, SnailNumber.from(input).magnitude())
+    }
+
+    @Test
+    fun part1TestMagnitude2() {
+        val input = "[[[[0,7],4],[[7,8],[6,0]]],[8,1]]"
+        assertEquals(1384, SnailNumber.from(input).magnitude())
+    }
+
+    @Test
+    fun part1TestMagnitude3() {
+        val input = "[[[[1,1],[2,2]],[3,3]],[4,4]]"
+        assertEquals(445, SnailNumber.from(input).magnitude())
+    }
+
+    @Test
+    fun part1TestMagnitude4() {
+        val input = "[[[[3,0],[5,3]],[4,4]],[5,5]]"
+        assertEquals(791, SnailNumber.from(input).magnitude())
+    }
+
+    @Test
+    fun part1TestMagnitude5() {
+        val input = "[[[[5,0],[7,4]],[5,5]],[6,6]]"
+        assertEquals(1137, SnailNumber.from(input).magnitude())
+    }
+
+    @Test
+    fun part1TestMagnitude6() {
+        val input = "[[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]"
+        assertEquals(3488, SnailNumber.from(input).magnitude())
     }
 
     @Test
