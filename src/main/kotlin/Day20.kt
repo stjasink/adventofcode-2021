@@ -57,8 +57,7 @@ class Day20 : Solver {
             for (y in minLitY-1 .. maxLitY+1) {
                 for (x in minLitX-1 .. maxLitX+1) {
                     val pixel = Pixel(x, y)
-                    val mappingIndex = codeForPixel(pixel)
-                    val newChar = mapping[mappingIndex]
+                    val newChar = mapping[mappingCodeForPixel(pixel)]
                     if (newChar == '#') {
                         enhancedLitPixels.add(pixel)
                     }
@@ -72,18 +71,18 @@ class Day20 : Solver {
             return Photo(enhancedLitPixels, enhancedOutOfRangePixelsLit)
         }
 
-        fun print() {
-            for (y in minLitY .. maxLitY) {
-                for (x in minLitX .. maxLitX) {
-                    val pixel = Pixel(x, y)
-                    print(if (litPixels.contains(pixel)) '#' else '.')
-                }
-                println()
-            }
-            println()
-        }
+//        fun print() {
+//            for (y in minLitY .. maxLitY) {
+//                for (x in minLitX .. maxLitX) {
+//                    val pixel = Pixel(x, y)
+//                    print(if (litPixels.contains(pixel)) '#' else '.')
+//                }
+//                println()
+//            }
+//            println()
+//        }
 
-        private fun codeForPixel(at: Pixel): Int {
+        private fun mappingCodeForPixel(at: Pixel): Int {
             val binaryString = StringBuilder()
             binaryString.append(if (isLit(Pixel(at.x-1,at.y-1))) '1' else '0')
             binaryString.append(if (isLit(Pixel(at.x,at.y-1))) '1' else '0')
@@ -98,10 +97,10 @@ class Day20 : Solver {
         }
         
         private fun isLit(at: Pixel): Boolean {
-            if (at.x < minLitX || at.y < minLitY || at.x > maxLitX || at.y > maxLitY) {
-                return outOfRangePixelsLit
+            return if (at.x < minLitX || at.y < minLitY || at.x > maxLitX || at.y > maxLitY) {
+                outOfRangePixelsLit
             } else {
-                return litPixels.contains(at)
+                litPixels.contains(at)
             }
         }
     }
