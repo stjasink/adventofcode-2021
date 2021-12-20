@@ -1,4 +1,5 @@
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class Day13Test {
@@ -33,6 +34,7 @@ class Day13Test {
         assertEquals(17L, answer)
     }
 
+    @Disabled
     @Test
     fun part2Test() {
         val input = """
