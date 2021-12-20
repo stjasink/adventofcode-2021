@@ -22,10 +22,10 @@ class Day18 : Solver {
 }
 
 data class SnailNumber(
-    var leftVal: Int?,
-    var left: SnailNumber?,
-    var rightVal: Int?,
-    var right: SnailNumber?,
+    val leftVal: Int?,
+    val left: SnailNumber?,
+    val rightVal: Int?,
+    val right: SnailNumber?,
     val depth: Int
 ) {
     companion object {
@@ -34,27 +34,65 @@ data class SnailNumber(
 
     fun explode(): SnailNumber {
         var leftRegularNumber: SnailNumber? = null
-        var rightNumberToAdd: Int? = 0
-        var foundExploder = false
+        var rightRegularNumber: SnailNumber? = null
+        var exploder: SnailNumber? = null
 
-        fun findExploding(number: SnailNumber) {
-            if (foundExploder) {
-                if (rightVal != null) {
-                    rightVal = rightVal!! + rightNumberToAdd!!
-                }
-            } else {
-                if (depth == 3) {
-                    if (left != null) {
-                        leftRegularNumber!!.leftVal = leftRegularNumber!!.leftVal!! + leftVal!!
-                    }
-                }
-                if (leftVal != null) {
-                    leftRegularNumber = number
+        fun findExploder(number: SnailNumber) {
+            if (exploder == null && (number.leftVal != null)) {
+                leftRegularNumber = number
+            }
+            if (number.depth == 4) {
+                if (number.left != null) {
+                    exploder = number.left
+                } else if (number.right != null) {
+                    exploder = number.right
                 }
             }
-
+            if (exploder != null && number != exploder && (number.leftVal != null || number.rightVal != null)) {
+                rightRegularNumber = number
+            }
+            number.left?.let { findExploder(it) }
+            number.right?.let { findExploder(it) }
         }
-        return SnailNumber(null, null, null, null, 1)
+
+        fun doExploding(number: SnailNumber): SnailNumber {
+            val newLeftVal = if (number == leftRegularNumber) {
+                if (number.rightVal != null) {
+                    number.rightVal + exploder!!.leftVal!!
+                } else if (number.leftVal != null) {
+                    number.leftVal + exploder!!.leftVal!!
+                } else {
+                    throw IllegalStateException("Expected leftVal or rightVal to be not null")
+                }
+            } else if (number.left == exploder) {
+                0
+            } else number.leftVal
+
+            val newRightVal = if (number == rightRegularNumber) {
+                if (number.leftVal != null) {
+                    number.leftVal + exploder!!.rightVal!!
+                } else if (number.rightVal != null) {
+                    number.rightVal + exploder!!.rightVal!!
+                } else {
+                    throw IllegalStateException("Expected leftVal or rightVal to be not null")
+                }
+            } else if (number.right == exploder) {
+                0
+            } else number.rightVal
+
+            val newLeft = if (number.left == exploder) null else number.left?.let { doExploding(it) }
+
+            val newRight = if (number.right == exploder) null else number.right?.let { doExploding(it) }
+
+            return SnailNumber(newLeftVal, newLeft, newRightVal, newRight, depth)
+        }
+
+        findExploder(this)
+        return if (exploder != null) {
+            doExploding(this)
+        } else {
+            this
+        }
     }
 
     fun reduce(): SnailNumber {
@@ -64,9 +102,9 @@ data class SnailNumber(
         val newRight: SnailNumber?
 
         if (leftVal != null) {
-            if (leftVal!! >= 10) {
-                val splitLeftVal = leftVal!! / 2
-                val splitRightVal = leftVal!! / 2 + (if (leftVal!! % 2 == 1) 1 else 0)
+            if (leftVal >= 10) {
+                val splitLeftVal = leftVal / 2
+                val splitRightVal = leftVal / 2 + (if (leftVal % 2 == 1) 1 else 0)
                 newLeftVal = null
                 newLeft = SnailNumber(splitLeftVal, null, splitRightVal, null, depth+1)
             } else {
@@ -78,9 +116,9 @@ data class SnailNumber(
             newLeft = left!!.reduce()
         }
         if (rightVal != null) {
-            if (rightVal!! >= 10) {
-                val splitLeftVal = rightVal!! / 2
-                val splitRightVal = rightVal!! / 2 + (if (rightVal!! % 2 == 1) 1 else 0)
+            if (rightVal >= 10) {
+                val splitLeftVal = rightVal / 2
+                val splitRightVal = rightVal / 2 + (if (rightVal % 2 == 1) 1 else 0)
                 newRightVal = null
                 newRight = SnailNumber(splitLeftVal, null, splitRightVal, null, depth+1)
             } else {

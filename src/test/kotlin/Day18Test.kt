@@ -76,16 +76,14 @@ class Day18Test {
     fun part1TestExplode1() {
         val input = "[[[[[9,8],1],2],3],4]"
         val output = "[[[[0,9],2],3],4]"
-//        assertEquals(output, doExplode(input))
-//        assertEquals(output, SnailNumber.from(input).reduce().toSnailString())
+        assertEquals(output, SnailNumber.from(input).explode().toSnailString())
     }
 
     @Test
     fun part1TestExplode2() {
         val input = "[7,[6,[5,[4,[3,2]]]]]"
         val output = "[7,[6,[5,[7,0]]]]"
-//        assertEquals(output, doExplode(input))
-//        assertEquals(output, SnailNumber.from(input).reduce().toSnailString())
+        assertEquals(output, SnailNumber.from(input).explode().toSnailString())
     }
 
 
@@ -93,7 +91,7 @@ class Day18Test {
     fun part1TestExplode5() {
         val input = "[[[[0,7],4],[[7,8],[0,[6,7]]]],[1,1]]"
         val output = "[[[[0,7],4],[[7,8],[6,0]]],[8,1]]"
-        assertEquals(output, SnailNumber.from(input).reduce().toSnailString())
+        assertEquals(output, SnailNumber.from(input).explode().toSnailString())
     }
 
 
