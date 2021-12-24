@@ -27,7 +27,65 @@ class Day21 : Solver {
     }
 
     override fun part2(input: List<String>): Long {
-        return 0L
+        val player1Start = input[0].last().digitToInt()
+        val player2Start = input[1].last().digitToInt()
+
+        val player1Sequence = sequenceFrom(player1Start)
+        val player2Sequence = sequenceFrom(player2Start)
+
+        var player1Pos = 1
+        var player2Pos = 1
+
+        var player1ValueCounts = mapOf<Int, Long>()
+        var player2ValueCounts = mapOf<Int, Long>()
+
+        var player1WinCount = 0L
+        var player2WinCount = 0L
+
+        val rollingChances = listOf(
+            3 to 1,
+            4 to 3,
+            5 to 6,
+            6 to 7,
+            7 to 6,
+            8 to 3,
+            9 to 1)
+
+        do {
+            // player 1
+            val newPlayer1ValueCounts = mutableMapOf<Int, Long>()
+            rollingChances.forEach {
+                val (roll, chance) = it
+                val num = player1Sequence[roll]
+                player1ValueCounts.forEach { currentNum, currentCount ->
+                    newPlayer1ValueCounts[currentNum + num] = chance * currentCount
+                }
+            }
+            val player1Won = newPlayer1ValueCounts.filter { it.key >= 21 }
+            player1WinCount += player1Won.values.sum()
+            player1ValueCounts = newPlayer1ValueCounts.filter { it.key < 21 }
+
+            // player 2
+            val newPlayer2ValueCounts = mutableMapOf<Int, Long>()
+            rollingChances.forEach {
+                val (roll, chance) = it
+                val num = player2Sequence[roll]
+                player2ValueCounts.forEach { currentNum, currentCount ->
+                    newPlayer2ValueCounts[currentNum + num] = chance * currentCount
+                }
+            }
+            val player2Won = newPlayer2ValueCounts.filter { it.key >= 21 }
+            player2WinCount += player2Won.values.sum()
+            player2ValueCounts = newPlayer2ValueCounts.filter { it.key < 21 }
+        } while (player1ValueCounts.isNotEmpty() && player2ValueCounts.isNotEmpty())
+
+        return maxOf(player1WinCount, player2WinCount)
+    }
+
+    fun sequenceFrom(start: Int): List<Int> {
+        return (-1..10_000).map {
+            (it + start) % 10 + 1
+        }
     }
 
     class Game(player1Start: Int, player2Start: Int) {

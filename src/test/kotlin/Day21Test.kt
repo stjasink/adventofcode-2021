@@ -17,9 +17,11 @@ class Day21Test {
     @Test
     fun part2Test() {
         val input = """
+            Player 1 starting position: 4
+            Player 2 starting position: 8
         """.trimIndent().split('\n')
 
         val answer = Day21().part2(input)
-        assertEquals(0L, answer)
+        assertEquals(444356092776315L, answer)
     }
 }
