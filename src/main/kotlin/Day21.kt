@@ -30,14 +30,8 @@ class Day21 : Solver {
         val player1Start = input[0].last().digitToInt()
         val player2Start = input[1].last().digitToInt()
 
-        val player1Sequence = sequenceFrom(player1Start)
-        val player2Sequence = sequenceFrom(player2Start)
-
-        var player1Pos = 1
-        var player2Pos = 1
-
-        var player1ValueCounts = mapOf<Int, Long>()
-        var player2ValueCounts = mapOf<Int, Long>()
+        var player1Counts = mapOf(Player(player1Start, 0) to 1L)
+        var player2Counts = mapOf(Player(player2Start, 0) to 1L)
 
         var player1WinCount = 0L
         var player2WinCount = 0L
@@ -53,31 +47,45 @@ class Day21 : Solver {
 
         do {
             // player 1
-            val newPlayer1ValueCounts = mutableMapOf<Int, Long>()
-            rollingChances.forEach {
-                val (roll, chance) = it
-                val num = player1Sequence[roll]
-                player1ValueCounts.forEach { currentNum, currentCount ->
-                    newPlayer1ValueCounts[currentNum + num] = chance * currentCount
+            val newPlayer1Counts = mutableMapOf<Player, Long>()
+            player1Counts.forEach { (player, count) ->
+                rollingChances.forEach { (roll, chance) ->
+                    val newPos = if (player.pos + roll > 10) ((player.pos + roll) % 10) else (player.pos + roll)
+                    val newTotal = player.total + newPos
+                    val newPlayer = Player(newPos, newTotal)
+                    if (newPlayer1Counts[newPlayer] == null) {
+                        newPlayer1Counts[newPlayer] = count * chance
+                    } else {
+                        newPlayer1Counts[newPlayer] = newPlayer1Counts[newPlayer]!! + (count * chance)
+                    }
                 }
             }
-            val player1Won = newPlayer1ValueCounts.filter { it.key >= 21 }
-            player1WinCount += player1Won.values.sum()
-            player1ValueCounts = newPlayer1ValueCounts.filter { it.key < 21 }
+            println(newPlayer1Counts.values.sum())
+            val player1NewlyWon = newPlayer1Counts.filter { it.key.total >= 21 }
+            player1WinCount += player1NewlyWon.values.sum()
+            player1Counts = newPlayer1Counts.filter { it.key.total < 21 }
 
             // player 2
-            val newPlayer2ValueCounts = mutableMapOf<Int, Long>()
-            rollingChances.forEach {
-                val (roll, chance) = it
-                val num = player2Sequence[roll]
-                player2ValueCounts.forEach { currentNum, currentCount ->
-                    newPlayer2ValueCounts[currentNum + num] = chance * currentCount
+            val newPlayer2Counts = mutableMapOf<Player, Long>()
+            player2Counts.forEach { (player, count) ->
+                rollingChances.forEach { (roll, chance) ->
+                    val newPos = if (player.pos + roll > 10) ((player.pos + roll) % 10) else (player.pos + roll)
+                    val newTotal = player.total + newPos
+                    val newPlayer = Player(newPos, newTotal)
+                    if (newPlayer2Counts[newPlayer] == null) {
+                        newPlayer2Counts[newPlayer] = count * chance
+                    } else {
+                        newPlayer2Counts[newPlayer] = newPlayer2Counts[newPlayer]!! + (count * chance)
+                    }
                 }
             }
-            val player2Won = newPlayer2ValueCounts.filter { it.key >= 21 }
-            player2WinCount += player2Won.values.sum()
-            player2ValueCounts = newPlayer2ValueCounts.filter { it.key < 21 }
-        } while (player1ValueCounts.isNotEmpty() && player2ValueCounts.isNotEmpty())
+            val player2NewlyWon = newPlayer2Counts.filter { it.key.total >= 21 }
+            player2WinCount += player2NewlyWon.values.sum()
+            player2Counts = newPlayer2Counts.filter { it.key.total < 21 }
+
+        } while (player1Counts.isNotEmpty() && player2Counts.isNotEmpty())
+
+        // total 786316482957123
 
         return maxOf(player1WinCount, player2WinCount)
     }
@@ -132,4 +140,9 @@ class Day21 : Solver {
             return rolledVal
         }
     }
+
+    data class Player(
+        val pos: Int,
+        val total: Int
+    )
 }
