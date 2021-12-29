@@ -14,71 +14,53 @@ fun main() {
 class Day22 : Solver {
 
     override fun part1(input: List<String>): Long {
-        val reactor = mutableSetOf<Cube>()
+        var reactor = listOf<Cuboid>()
         val targetRange = -50..50
 
         input.forEach { line ->
-            val (onOff, ranges) = parseLine(line)
-            if (ranges[0].intersect(targetRange).isNotEmpty() && ranges[1].intersect(targetRange).isNotEmpty() && ranges[2].intersect(targetRange).isNotEmpty()) {
-                for (x in ranges[0]) {
-                    for (y in ranges[1]) {
-                        for (z in ranges[2]) {
-                            val cube = Cube(x, y, z)
-                            if (onOff) {
-                                reactor.add(cube)
-                            } else {
-                                reactor.remove(cube)
-                            }
-                        }
-                    }
+            val (onOff, cuboid) = parseLine(line)
+            if (cuboid.x.intersect(targetRange).isNotEmpty() && cuboid.y.intersect(targetRange).isNotEmpty() && cuboid.z.intersect(targetRange).isNotEmpty()) {
+                reactor = if (onOff) {
+                    reactor.map { it.turnOff(cuboid) } + cuboid
+                } else {
+                    reactor.map { it.turnOff(cuboid) }
                 }
             }
+
         }
 
-        return reactor.size.toLong()
+        return reactor.map { it.count() }.sum()
+
     }
 
     override fun part2(input: List<String>): Long {
         var reactor = listOf<Cuboid>()
 
-        input.forEachIndexed { lineNum, line ->
-            val (onOff, cuboid) = parseLine2(line)
-            if (onOff) {
-                reactor = reactor + cuboid
+        input.forEach { line ->
+            val (onOff, cuboid) = parseLine(line)
+            reactor = if (onOff) {
+                reactor.map { it.turnOff(cuboid) } + cuboid
             } else {
-                reactor = reactor.map { it.turnOff(cuboid) }
+                reactor.map { it.turnOff(cuboid) }
             }
         }
 
         return reactor.map { it.count() }.sum()
     }
 
-    fun parseLine2(line: String): Pair<Boolean, Cuboid> {
+    private fun parseLine(line: String): Pair<Boolean, Cuboid> {
         val parts = line.split(" ")
         val onOff = if (parts[0] == "on") true else false
         val ranges = parseRanges(parts[1])
         return onOff to Cuboid(ranges[0], ranges[1], ranges[2])
     }
 
-    fun parseLine(line: String): Pair<Boolean, List<IntRange>> {
-        val parts = line.split(" ")
-        val onOff = if (parts[0] == "on") true else false
-        val ranges = parseRanges(parts[1])
-        return onOff to ranges
-    }
-
-    fun parseRanges(line: String): List<IntRange> {
+    private fun parseRanges(line: String): List<IntRange> {
         return line.split(",")
             .map { it.substringAfter("=") }
             .map { it.split("..") }
             .map { IntRange(it[0].toInt(), it[1].toInt()) }
     }
-
-    data class Cube(
-        val x: Int,
-        val y: Int,
-        val z: Int
-    )
 
     data class Cuboid(
         val x: IntRange,
@@ -88,10 +70,10 @@ class Day22 : Solver {
     ) {
         fun turnOff(off: Cuboid): Cuboid {
             val hole = this.overlap(off)
-            if (hole != null) {
-                return this.copy(holes = holes + hole)
+            return if (hole != null) {
+                this.copy(holes = holes.map { it.turnOff(hole) } + hole)
             } else {
-                return this
+                this
             }
         }
         
@@ -112,7 +94,8 @@ class Day22 : Solver {
         }
 
         fun count(): Long {
-            var on = (x.endInclusive - x.start).absoluteValue.toLong() * (y.endInclusive - y.start).absoluteValue.toLong() * (z.endInclusive - z.start).absoluteValue.toLong()
+            var on =
+                ((x.endInclusive - x.start).absoluteValue + 1).toLong() * ((y.endInclusive - y.start).absoluteValue + 1).toLong() * ((z.endInclusive - z.start).absoluteValue + 1).toLong()
             holes.forEach { hole ->
                 on -= hole.count()
             }
