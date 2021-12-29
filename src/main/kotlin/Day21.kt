@@ -30,8 +30,7 @@ class Day21 : Solver {
         val player1Start = input[0].last().digitToInt()
         val player2Start = input[1].last().digitToInt()
 
-        var player1Counts = mapOf(Player(player1Start, 0) to 1L)
-        var player2Counts = mapOf(Player(player2Start, 0) to 1L)
+        var playerCounts = mapOf(Pair(Player(player1Start, 0), Player(player2Start, 0)) to 1L)
 
         var player1WinCount = 0L
         var player2WinCount = 0L
@@ -47,45 +46,46 @@ class Day21 : Solver {
 
         do {
             // player 1
-            val newPlayer1Counts = mutableMapOf<Player, Long>()
-            player1Counts.forEach { (player, count) ->
+            val newPlayer1Counts = mutableMapOf<Pair<Player, Player>, Long>()
+            playerCounts.forEach { (players, count) ->
                 rollingChances.forEach { (roll, chance) ->
-                    val newPos = if (player.pos + roll > 10) ((player.pos + roll) % 10) else (player.pos + roll)
-                    val newTotal = player.total + newPos
+                    val newPos = if (players.first.pos + roll > 10) ((players.first.pos + roll) % 10) else (players.first.pos + roll)
+                    val newTotal = players.first.total + newPos
                     val newPlayer = Player(newPos, newTotal)
-                    if (newPlayer1Counts[newPlayer] == null) {
-                        newPlayer1Counts[newPlayer] = count * chance
+                    val newPlayerPair = Pair(newPlayer, players.second)
+                    if (newPlayer1Counts[newPlayerPair] == null) {
+                        newPlayer1Counts[newPlayerPair] = count * chance
                     } else {
-                        newPlayer1Counts[newPlayer] = newPlayer1Counts[newPlayer]!! + (count * chance)
+                        newPlayer1Counts[newPlayerPair] = newPlayer1Counts[newPlayerPair]!! + (count * chance)
                     }
                 }
             }
-            println(newPlayer1Counts.values.sum())
-            val player1NewlyWon = newPlayer1Counts.filter { it.key.total >= 21 }
+            val player1NewlyWon = newPlayer1Counts.filter { it.key.first.total >= 21 }
             player1WinCount += player1NewlyWon.values.sum()
-            player1Counts = newPlayer1Counts.filter { it.key.total < 21 }
+            playerCounts = newPlayer1Counts.filter { it.key.first.total < 21 }
 
             // player 2
-            val newPlayer2Counts = mutableMapOf<Player, Long>()
-            player2Counts.forEach { (player, count) ->
+            val newPlayer2Counts = mutableMapOf<Pair<Player, Player>, Long>()
+            playerCounts.forEach { (players, count) ->
                 rollingChances.forEach { (roll, chance) ->
-                    val newPos = if (player.pos + roll > 10) ((player.pos + roll) % 10) else (player.pos + roll)
-                    val newTotal = player.total + newPos
+                    val newPos = if (players.second.pos + roll > 10) ((players.second.pos + roll) % 10) else (players.second.pos + roll)
+                    val newTotal = players.second.total + newPos
                     val newPlayer = Player(newPos, newTotal)
-                    if (newPlayer2Counts[newPlayer] == null) {
-                        newPlayer2Counts[newPlayer] = count * chance
+                    val newPlayerPair = Pair(players.first, newPlayer)
+                    if (newPlayer2Counts[newPlayerPair] == null) {
+                        newPlayer2Counts[newPlayerPair] = count * chance
                     } else {
-                        newPlayer2Counts[newPlayer] = newPlayer2Counts[newPlayer]!! + (count * chance)
+                        newPlayer2Counts[newPlayerPair] = newPlayer2Counts[newPlayerPair]!! + (count * chance)
                     }
                 }
             }
-            val player2NewlyWon = newPlayer2Counts.filter { it.key.total >= 21 }
+            val player2NewlyWon = newPlayer2Counts.filter { it.key.second.total >= 21 }
             player2WinCount += player2NewlyWon.values.sum()
-            player2Counts = newPlayer2Counts.filter { it.key.total < 21 }
+            playerCounts = newPlayer2Counts.filter { it.key.second.total < 21 }
 
-        } while (player1Counts.isNotEmpty() && player2Counts.isNotEmpty())
+        } while (playerCounts.isNotEmpty())
 
-        // total 786316482957123
+        // 444356092776315
 
         return maxOf(player1WinCount, player2WinCount)
     }
