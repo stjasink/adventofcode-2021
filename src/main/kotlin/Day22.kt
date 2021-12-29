@@ -1,6 +1,9 @@
 import common.Solver
 import common.runAndTime
 import common.loadInput
+import kotlin.math.absoluteValue
+import kotlin.math.max
+import kotlin.math.min
 
 fun main() {
     val input = loadInput("day-22.txt")
@@ -36,7 +39,25 @@ class Day22 : Solver {
     }
 
     override fun part2(input: List<String>): Long {
-        return 0L
+        var reactor = listOf<Cuboid>()
+
+        input.forEachIndexed { lineNum, line ->
+            val (onOff, cuboid) = parseLine2(line)
+            if (onOff) {
+                reactor = reactor + cuboid
+            } else {
+                reactor = reactor.map { it.turnOff(cuboid) }
+            }
+        }
+
+        return reactor.map { it.count() }.sum()
+    }
+
+    fun parseLine2(line: String): Pair<Boolean, Cuboid> {
+        val parts = line.split(" ")
+        val onOff = if (parts[0] == "on") true else false
+        val ranges = parseRanges(parts[1])
+        return onOff to Cuboid(ranges[0], ranges[1], ranges[2])
     }
 
     fun parseLine(line: String): Pair<Boolean, List<IntRange>> {
@@ -58,4 +79,44 @@ class Day22 : Solver {
         val y: Int,
         val z: Int
     )
+
+    data class Cuboid(
+        val x: IntRange,
+        val y: IntRange,
+        val z: IntRange,
+        val holes: List<Cuboid> = emptyList()
+    ) {
+        fun turnOff(off: Cuboid): Cuboid {
+            val hole = this.overlap(off)
+            if (hole != null) {
+                return this.copy(holes = holes + hole)
+            } else {
+                return this
+            }
+        }
+        
+        fun overlap(other: Cuboid): Cuboid? {
+            val xOverlaps = (x.start <= other.x.start && x.endInclusive >= other.x.start) || (other.x.start <= x.start && other.x.endInclusive >= x.start)
+            val yOverlaps = (y.start <= other.y.start && y.endInclusive >= other.y.start) || (other.y.start <= y.start && other.y.endInclusive >= y.start)
+            val zOverlaps = (z.start <= other.z.start && z.endInclusive >= other.z.start) || (other.z.start <= z.start && other.z.endInclusive >= z.start)
+            
+            if (xOverlaps && yOverlaps && zOverlaps) {
+                val xOverlap = max(x.start, other.x.start) .. min(x.endInclusive, other.x.endInclusive)
+                val yOverlap = max(y.start, other.y.start) .. min(y.endInclusive, other.y.endInclusive)
+                val zOverlap = max(z.start, other.z.start) .. min(z.endInclusive, other.z.endInclusive)
+
+                return Cuboid(xOverlap, yOverlap, zOverlap)
+            } else {
+                return null
+            }
+        }
+
+        fun count(): Long {
+            var on = (x.endInclusive - x.start).absoluteValue.toLong() * (y.endInclusive - y.start).absoluteValue.toLong() * (z.endInclusive - z.start).absoluteValue.toLong()
+            holes.forEach { hole ->
+                on -= hole.count()
+            }
+            return on.coerceAtLeast(0L)
+        }
+    }
 }
