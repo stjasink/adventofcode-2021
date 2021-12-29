@@ -30,7 +30,7 @@ class Day21 : Solver {
         val player1Start = input[0].last().digitToInt()
         val player2Start = input[1].last().digitToInt()
 
-        var playerCounts = mapOf(Pair(Player(player1Start, 0), Player(player2Start, 0)) to 1L)
+        var gameCounts = mapOf(Pair(Player(pos = player1Start, total = 0), Player(pos = player2Start, total = 0)) to 1L)
 
         var player1WinCount = 0L
         var player2WinCount = 0L
@@ -47,7 +47,7 @@ class Day21 : Solver {
         do {
             // player 1
             val newPlayer1Counts = mutableMapOf<Pair<Player, Player>, Long>()
-            playerCounts.forEach { (players, count) ->
+            gameCounts.forEach { (players, count) ->
                 rollingChances.forEach { (roll, chance) ->
                     val newPos = if (players.first.pos + roll > 10) ((players.first.pos + roll) % 10) else (players.first.pos + roll)
                     val newTotal = players.first.total + newPos
@@ -62,11 +62,11 @@ class Day21 : Solver {
             }
             val player1NewlyWon = newPlayer1Counts.filter { it.key.first.total >= 21 }
             player1WinCount += player1NewlyWon.values.sum()
-            playerCounts = newPlayer1Counts.filter { it.key.first.total < 21 }
+            gameCounts = newPlayer1Counts.filter { it.key.first.total < 21 }
 
             // player 2
             val newPlayer2Counts = mutableMapOf<Pair<Player, Player>, Long>()
-            playerCounts.forEach { (players, count) ->
+            gameCounts.forEach { (players, count) ->
                 rollingChances.forEach { (roll, chance) ->
                     val newPos = if (players.second.pos + roll > 10) ((players.second.pos + roll) % 10) else (players.second.pos + roll)
                     val newTotal = players.second.total + newPos
@@ -81,19 +81,11 @@ class Day21 : Solver {
             }
             val player2NewlyWon = newPlayer2Counts.filter { it.key.second.total >= 21 }
             player2WinCount += player2NewlyWon.values.sum()
-            playerCounts = newPlayer2Counts.filter { it.key.second.total < 21 }
+            gameCounts = newPlayer2Counts.filter { it.key.second.total < 21 }
 
-        } while (playerCounts.isNotEmpty())
-
-        // 444356092776315
+        } while (gameCounts.isNotEmpty())
 
         return maxOf(player1WinCount, player2WinCount)
-    }
-
-    fun sequenceFrom(start: Int): List<Int> {
-        return (-1..10_000).map {
-            (it + start) % 10 + 1
-        }
     }
 
     class Game(player1Start: Int, player2Start: Int) {
@@ -111,7 +103,6 @@ class Day21 : Solver {
                 player1Pos %= 10
             }
             player1Total += player1Pos
-//            println("Player 1 rolls ${dice[0]}+${dice[1]}+${dice[2]} and moves to space $player1Pos for a total score of $player1Total.")
             return player1Total >= 1000
         }
 
@@ -122,7 +113,6 @@ class Day21 : Solver {
                 player2Pos %= 10
             }
             player2Total += player2Pos
-//            println("Player 2 rolls ${dice[0]}+${dice[1]}+${dice[2]} and moves to space $player2Pos for a total score of $player2Total.")
             return player2Total >= 1000
         }
 
