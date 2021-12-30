@@ -30,10 +30,23 @@ class Day23 : Solver {
 
     fun findEndStateWithLowestEnergy(startState: Set<Amphipod>): Int {
         var lowestEnergyFound = Int.MAX_VALUE
+        val statesSeen = mutableSetOf<Set<Amphipod>>()
 
-        fun doMoves(state: Set<Amphipod>) {
-//            state.print()
-            val moves = state.allPossibleMoves()
+        fun doMoves(state: Set<Amphipod>, depth: Int) {
+//            if (lowestEnergyFound == 46209) {
+//                println("depth $depth")
+//                            state.print()
+//            }
+
+            if (state in statesSeen) {
+                return
+            }
+            if (statesSeen.size % 10_000 == 0) {
+                print(".")
+            }
+            statesSeen.add(state)
+            // prioritise moves that go into rooms
+            val moves = state.allPossibleMoves().sortedByDescending { it.second.y }
             moves.forEach { (pod, newPos) ->
                 val newPod = pod.moveTo(newPos)
                 val newState = (state - pod) + newPod
@@ -46,12 +59,12 @@ class Day23 : Solver {
                     lowestEnergyFound = newStateEnergy
                     println("Found end state with energy $newStateEnergy")
                 } else {
-                    doMoves(newState)
+                    doMoves(newState, depth + 1)
                 }
             }
         }
 
-        doMoves(startState)
+        doMoves(startState, 1)
 
         return lowestEnergyFound
     }
@@ -81,25 +94,18 @@ class Day23 : Solver {
         }
         println("#")
 
-        print("###")
-        print(firstOrNull { it.pos == Position(2, 1) }?.type ?: ".")
-        print("#")
-        print(firstOrNull { it.pos == Position(4, 1) }?.type ?: ".")
-        print("#")
-        print(firstOrNull { it.pos == Position(6, 1) }?.type ?: ".")
-        print("#")
-        print(firstOrNull { it.pos == Position(8, 1) }?.type ?: ".")
-        println("###")
-
-        print("  #")
-        print(firstOrNull { it.pos == Position(2, 2) }?.type ?: ".")
-        print("#")
-        print(firstOrNull { it.pos == Position(4, 2) }?.type ?: ".")
-        print("#")
-        print(firstOrNull { it.pos == Position(6, 2) }?.type ?: ".")
-        print("#")
-        print(firstOrNull { it.pos == Position(8, 2) }?.type ?: ".")
-        println("#")
+        val maxY = size / 4
+        for (y in 1 .. maxY) {
+            print (if (y == 1) "###" else "  #")
+            print(firstOrNull { it.pos == Position(2, y) }?.type ?: ".")
+            print("#")
+            print(firstOrNull { it.pos == Position(4, y) }?.type ?: ".")
+            print("#")
+            print(firstOrNull { it.pos == Position(6, y) }?.type ?: ".")
+            print("#")
+            print(firstOrNull { it.pos == Position(8, y) }?.type ?: ".")
+            println (if (y == 1) "###" else "#")
+        }
 
         println("  #########")
         println()
@@ -128,28 +134,23 @@ class Day23 : Solver {
         }
 
         fun possibleMoves(state: Set<Amphipod>): List<Position> {
-            // two types of moves to consider, of which only one will apply:
+            // types of moves to consider, of which only one will apply:
             // 1) move from starting room into corridor, to any location that is not blocked or outside a room
             // 2) move from corridor into destination room, to the deepest possible location
+            // 3) move from destination room into corridor, if there is a different type trapped below
 
+            val maxY = state.size / 4
             return if (isInCorridor()) {
-                // check if destination room is available and is empty or contains only the same type
+                // check if destination room contains no pods of other types
                 val podsInDestRoom = state.filter { it.pos.x == type.destRoomX }
-                if (podsInDestRoom.isEmpty()) {
-                    // if empty then go to the bottom if there is a route to the room entrance
+                if (podsInDestRoom.none { it.type != type }) {
+                    // check if there is a route to the room entrance
                     val xBetweenPodAndRoom = min(pos.x, type.destRoomX) .. max(pos.x, type.destRoomX)
                     val podsInTheWay = state.filter { it.pos.y == 0 && it.pos.x in xBetweenPodAndRoom } - this
                     if (podsInTheWay.isEmpty()) {
-                        listOf(Position(type.destRoomX, 2))
-                    } else {
-                        emptyList()
-                    }
-                } else if (podsInDestRoom.size == 1 && podsInDestRoom.first().type == type) {
-                    // if there is one and it's the same type then assume it is at the bottom, so go to the top if there is a route to the room entrance
-                    val xBetweenPodAndRoom = min(pos.x, type.destRoomX) .. max(pos.x, type.destRoomX)
-                    val podsInTheWay = state.filter { it.pos.y == 0 && it.pos.x in xBetweenPodAndRoom } - this
-                    if (podsInTheWay.isEmpty()) {
-                        listOf(Position(type.destRoomX, 1))
+                        // assume that pods have filled up from the bottom, so find the max y to go to
+                        val destY = podsInDestRoom.minOfOrNull { it.pos.y - 1 } ?: maxY
+                        listOf(Position(type.destRoomX, destY))
                     } else {
                         emptyList()
                     }
@@ -158,8 +159,9 @@ class Day23 : Solver {
                     emptyList()
                 }
             } else if (isInDestRoom()) {
-                // if in destination room then we don't want to move unless we are at the top and another type is below
-                if (pos.y == 1 && state.first { it.pos.x == pos.x && it.pos.y == 2 }.type != type) {
+                // if in destination room then we don't want to move unless another type is below
+                val lowerPodsInDestRoom = state.filter { it.pos.x == pos.x && it.pos.y > pos.y }
+                if (lowerPodsInDestRoom.any { it.type != type }) {
                     val leftCorridorLimit = state.filter { it.pos.y == 0 && it.pos.x < pos.x }.maxOfOrNull { it.pos.x + 1 } ?: 0
                     val leftCorridorPositions = (leftCorridorLimit .. pos.x).map { Position(it, 0) }
                     val rightCorridorLimit = state.filter { it.pos.y == 0 && it.pos.x > pos.x }.minOfOrNull { it.pos.x - 1 } ?: 10
@@ -171,9 +173,8 @@ class Day23 : Solver {
                 }
             } else {
                 // if at the bottom and there is another pod on top then can't move
-                if (pos.y == 2 && state.firstOrNull { it.pos.x == pos.x && it.pos.y == 1 } != null) {
-                    emptyList()
-                } else {
+                val higherPodsInDestRoom = state.filter { it.pos.x == pos.x && it.pos.y < pos.y }
+                if (higherPodsInDestRoom.isEmpty()) {
                     // possible to move to each spot in the corridor that is not outside a room or blocked by another pod
                     val leftCorridorLimit = state.filter { it.pos.y == 0 && it.pos.x < pos.x }.maxOfOrNull { it.pos.x + 1 } ?: 0
                     val leftCorridorPositions = (leftCorridorLimit .. pos.x).map { Position(it, 0) }
@@ -181,6 +182,8 @@ class Day23 : Solver {
                     val rightCorridorPositions = (pos.x .. rightCorridorLimit).map { Position(it, 0) }
                     val positionsNotOutsideDoors = (leftCorridorPositions + rightCorridorPositions) - AmphipodType.values().map { Position(it.destRoomX, 0) }
                     positionsNotOutsideDoors
+                } else {
+                    emptyList()
                 }
             }
         }
