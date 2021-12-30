@@ -17,8 +17,8 @@ fun timeCode(code: () -> Unit): Duration {
 }
 
 fun runAndTime(solver: Solver, input: List<String>) {
-    val part1Answer = solver.part1(input)
-    println("Part 1 answer: $part1Answer")
+//    val part1Answer = solver.part1(input)
+//    println("Part 1 answer: $part1Answer")
     val part2Answer = solver.part2(input)
     println("Part 2 answer: $part2Answer")
 
