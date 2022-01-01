@@ -24,40 +24,37 @@ class Day23 : Solver {
         val extraLine2 = "  #D#B#A#C#"
         val unfoldedInput = input.take(3) + extraLine1 + extraLine2 + input.takeLast(2)
         val startState = parseStartState(unfoldedInput)
-        startState.print()
         val energyUsed = findEndStateWithLowestEnergy(startState)
         return energyUsed.toLong()
     }
 
-    fun findEndStateWithLowestEnergy(startState: Set<Amphipod>): Int {
+    private fun findEndStateWithLowestEnergy(startState: Set<Amphipod>): Int {
         var lowestEnergyFound = Int.MAX_VALUE
-        val statesSeen = mutableSetOf<Set<Amphipod>>()
+        val statesSeenWithEnergy = mutableMapOf<Set<Amphipod>, Int>()
 
         fun doMoves(state: Set<Amphipod>, depth: Int) {
-            if (state in statesSeen) {
-                return
-            }
-//            if (statesSeen.size % 1_000 == 0) {
-//                print(".")
-//            }
-            statesSeen.add(state)
+            statesSeenWithEnergy.put(state, state.totalEnergyUsed())
 //            state.print()
             val moves = state.allPossibleMoves()
-                // prioritise by how close they go to the destination room
-//                .sortedBy { (it.first.type.destRoomX - it.second.x).absoluteValue }
+                // prioritise by how close a pod moves to its destination room
+                .sortedBy { (it.first.type.destRoomX - it.second.x).absoluteValue }
                 // prioritise more expensive first
 //                .sortedByDescending { it.first.type.energyPerMove }
-                 // reverse because it works much quicker for my input
-                .reversed()
                 // prioritise those that go into a room
-                .sortedByDescending { it.second.y }
+//                .sortedByDescending { it.second.y }
             moves.forEach { (pod, newPos) ->
                 val newPod = pod.moveTo(newPos)
                 val newState = (state - pod) + newPod
-                // no point continuing if we have already used more energy than a previous end state
+                // no point continuing if we have already used more energy than the current lowest end state
                 val newStateEnergy = newState.totalEnergyUsed()
                 if (newStateEnergy >= lowestEnergyFound) {
-                    return
+                    return@forEach
+                }
+                // no point continuing if we have previously been in this same arrangement with lower energy
+                statesSeenWithEnergy[newState]?.apply {
+                    if (newStateEnergy >= this) {
+                        return@forEach
+                    }
                 }
                 if (newState.allInDestRooms()) {
                     lowestEnergyFound = newStateEnergy
@@ -85,10 +82,6 @@ class Day23 : Solver {
     fun Set<Amphipod>.allPossibleMoves(): List<Pair<Amphipod, Position>> {
         return this.flatMap { pod ->
             pod.possibleMoves(this).map { move ->
-//                if (pod.type == AmphipodType.B && pod.pos == Position(4, 3)) {
-//                    this.print()
-//                    println("???")
-//                }
                 Pair(pod, move)
             }
         }
@@ -119,7 +112,7 @@ class Day23 : Solver {
         println()
     }
 
-    data class Amphipod (
+    class Amphipod (
         val type: AmphipodType,
         val pos: Position,
         val moveCount: Int) {
@@ -130,7 +123,7 @@ class Day23 : Solver {
 
         fun moveTo(newPos: Position): Amphipod {
             val numMoves = (pos.x - newPos.x).absoluteValue + (pos.y - newPos.y).absoluteValue
-            return copy(pos = newPos, moveCount = moveCount + numMoves)
+            return Amphipod(type = type, pos = newPos, moveCount = moveCount + numMoves)
         }
 
         fun energyUsed(): Int {
@@ -200,6 +193,14 @@ class Day23 : Solver {
             }
         }
 
+        override fun hashCode(): Int {
+            return type.hashCode() * 63 + pos.hashCode()
+        }
+
+        override fun equals(other: Any?): Boolean {
+            val otherPod = other as Amphipod
+            return type == otherPod.type && pos == otherPod.pos
+        }
 
     }
 
