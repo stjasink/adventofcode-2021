@@ -70,16 +70,16 @@ class Day23 : Solver {
         return lowestEnergyFound
     }
 
-    fun Set<Amphipod>.allInDestRooms(): Boolean {
+    private fun Set<Amphipod>.allInDestRooms(): Boolean {
         val eachInDestRoom = this.map { it.isInDestRoom() }
         return !eachInDestRoom.contains(false)
     }
 
-    fun Set<Amphipod>.totalEnergyUsed(): Int {
-        return this.sumOf { it.energyUsed() }
+    private fun Set<Amphipod>.totalEnergyUsed(): Int {
+        return this.sumOf { it.energyUsed }
     }
 
-    fun Set<Amphipod>.allPossibleMoves(): List<Pair<Amphipod, Position>> {
+    private fun Set<Amphipod>.allPossibleMoves(): List<Pair<Amphipod, Position>> {
         return this.flatMap { pod ->
             pod.possibleMoves(this).map { move ->
                 Pair(pod, move)
@@ -115,7 +115,7 @@ class Day23 : Solver {
     class Amphipod (
         val type: AmphipodType,
         val pos: Position,
-        val moveCount: Int) {
+        val energyUsed: Int) {
 
         fun isInDestRoom(): Boolean {
             return pos.y > 0 && pos.x == type.destRoomX
@@ -123,11 +123,7 @@ class Day23 : Solver {
 
         fun moveTo(newPos: Position): Amphipod {
             val numMoves = (pos.x - newPos.x).absoluteValue + (pos.y - newPos.y).absoluteValue
-            return Amphipod(type = type, pos = newPos, moveCount = moveCount + numMoves)
-        }
-
-        fun energyUsed(): Int {
-            return moveCount * type.energyPerMove
+            return Amphipod(type = type, pos = newPos, energyUsed = energyUsed + numMoves * type.energyPerMove)
         }
 
         private fun isInCorridor(): Boolean {
@@ -193,10 +189,12 @@ class Day23 : Solver {
             }
         }
 
+        // only consider type and position for hashcode and equality
         override fun hashCode(): Int {
             return type.hashCode() * 63 + pos.hashCode()
         }
 
+        // only consider type and position for hashcode and equality
         override fun equals(other: Any?): Boolean {
             val otherPod = other as Amphipod
             return type == otherPod.type && pos == otherPod.pos
